@@ -31,7 +31,7 @@ After a pin change, re-run `make init ENV=<env>` so OpenTofu fetches the new mod
 ├── docs/                    # operational notes
 └── iac/envs/
     ├── local/               # kind / maze.local
-    └── production/          # bare metal / maze.tech
+    └── production/          # bare metal / maze.trading
 ```
 
 ## Local quick start
@@ -64,7 +64,7 @@ Then apply the platform:
 
 ```bash
 cp iac/envs/production/terraform.tfvars.example iac/envs/production/terraform.tfvars
-# fill kubeconfig_context, storage_nodes (/dev/sdb), DBs, OVH backup keys, etc.
+# fill ovh_cloud_project_id, OVH API env keys, backup_encryption_password, bootstrap admins, cluster_domain=maze.trading, etc.
 
 make init ENV=production
 make apply ENV=production

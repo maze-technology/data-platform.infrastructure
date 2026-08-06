@@ -43,3 +43,8 @@ override.tf.json
 terraform.rc
 
 # End of https://www.toptal.com/developers/gitignore/api/git,terraform
+
+# Local secrets (OVH API, etc.)
+.env
+.env.*
+!.env.example

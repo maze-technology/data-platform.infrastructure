@@ -95,7 +95,7 @@ provider "aws" {
 
 module "infrastructure_base" {
   # infrastructure-base v0.1.4 — external PG port/SSL + OVH wiring
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.4"
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.5"
 
   providers = {
     aws.rgw = aws.rgw

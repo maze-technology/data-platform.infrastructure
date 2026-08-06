@@ -18,6 +18,11 @@ RGW_PF_NAMESPACE ?= rook-ceph
 RGW_PF_SERVICE ?= svc/rook-ceph-rgw-rgw-store
 RGW_PF_REMOTE_PORT ?= 80
 
+# Export OVH_* from gitignored .env into Make's environment (all recipes inherit them)
+ifneq ($(wildcard .env),)
+  $(foreach _line,$(shell sed -nE 's/^[[:space:]]*(export[[:space:]]+)?(OVH_[A-Z0-9_]+)=(.*)$$/\2=\3/p' .env | sed "s/[\"']//g"),$(eval export $(_line)))
+endif
+
 # Default target
 help: ## Show this help message
 	@echo "Available targets:"

@@ -49,16 +49,28 @@ Useful helpers: `make setup-loop-devices`, `make prepull-ceph-image`, `make kind
 
 Do **not** commit `terraform.tfvars`, `*.tfstate`, or `.terraform/`.
 
-## Production
+## Production (OVH bare metal)
+
+Bootstrap Kubernetes on the dedicated servers first (see [docs/bare-metal.md](docs/bare-metal.md)):
+
+```bash
+export SSH_KEY=~/.ssh/ovh_maze
+cp scripts/bare-metal/inventory.env.example scripts/bare-metal/inventory.env
+# fill SSH hosts / IPs (inventory.env is gitignored)
+make bare-metal-bootstrap   # host basics + kubeadm HA + Cilium
+```
+
+Then apply the platform:
 
 ```bash
 cp iac/envs/production/terraform.tfvars.example iac/envs/production/terraform.tfvars
-# fill kubeconfig_context, storage_nodes, DBs, letsencrypt_email, vault_token, bootstrap secrets
+# fill kubeconfig_context, storage_nodes (/dev/sdb), DBs, OVH backup keys, etc.
 
 make init ENV=production
 make apply ENV=production
 ```
 
+Ingress should sit behind the cloud load balancer VIP from inventory (`LB_FLOATING_IP`); prefer NodePort/hostNetwork over MetalLB when using that LB.
 ## Providers
 
 This repo owns provider configuration:

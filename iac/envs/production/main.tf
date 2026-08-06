@@ -94,8 +94,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # Pin to commit until infrastructure-base PR #6 is merged + tagged as v0.1.4
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=4debbc1"
+  # infrastructure-base v0.1.4 — external PG port/SSL + OVH wiring
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.4"
 
   providers = {
     aws.rgw = aws.rgw

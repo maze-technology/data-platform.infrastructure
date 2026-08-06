@@ -314,13 +314,15 @@ apply-services: ## Apply services layer (S3 buckets, observability, applications
 	  eval $$(vault kv get -format=json secret/rgw/credentials | jq -r ".data.data | \"export AWS_ACCESS_KEY_ID=\(.access_key); export AWS_SECRET_ACCESS_KEY=\(.secret_key)\""); \
 	  echo "Applying S3 buckets and remaining infrastructure..."; \
 	  TF_DIR="iac/envs/$(ENV)"; \
+	  # Local smoke: Velero target is in-cluster RGW (reuse RGW keys). Production: keep OVH keys from tfvars. \
+	  if [ "$(ENV)" = "local" ]; then \
+	    export TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY"; \
+	  fi; \
 	  TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	    AWS_ACCESS_KEY_ID="$$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$$AWS_SECRET_ACCESS_KEY" \
-	    TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY" \
 	    tofu -chdir="$$TF_DIR" import -input=false module.infrastructure_base.aws_s3_bucket.loki_logs loki-logs-local >/dev/null 2>&1 || true; \
 	  TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	    AWS_ACCESS_KEY_ID="$$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$$AWS_SECRET_ACCESS_KEY" \
-	    TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY" \
 	    tofu -chdir="$$TF_DIR" import -input=false module.infrastructure_base.aws_s3_bucket.gitlab_storage gitlab-storage-local >/dev/null 2>&1 || true; \
 	  TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	    tofu -chdir="$$TF_DIR" import -input=false module.infrastructure_base.module.keycloak.helm_release.keycloak keycloak/keycloak >/dev/null 2>&1 || true; \
@@ -329,18 +331,15 @@ apply-services: ## Apply services layer (S3 buckets, observability, applications
 	    echo "tofu apply (attempt $$attempt/5)..."; \
 	    if TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	         AWS_ACCESS_KEY_ID="$$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$$AWS_SECRET_ACCESS_KEY" \
-	         TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY" \
 	         tofu -chdir="$$TF_DIR" apply -auto-approve; then \
 	      APPLY_OK=1; break; \
 	    fi; \
 	    echo "tofu apply failed (attempt $$attempt); waiting 30s before retry..."; \
 	    TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	      AWS_ACCESS_KEY_ID="$$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$$AWS_SECRET_ACCESS_KEY" \
-	      TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY" \
 	      tofu -chdir="$$TF_DIR" import -input=false module.infrastructure_base.aws_s3_bucket.loki_logs loki-logs-local >/dev/null 2>&1 || true; \
 	    TF_VAR_vault_address="$$VAULT_ADDR" TF_VAR_rgw_s3_endpoint="$$RGW_ENDPOINT" \
 	      AWS_ACCESS_KEY_ID="$$AWS_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$$AWS_SECRET_ACCESS_KEY" \
-	      TF_VAR_backup_s3_access_key="$$AWS_ACCESS_KEY_ID" TF_VAR_backup_s3_secret_key="$$AWS_SECRET_ACCESS_KEY" \
 	      tofu -chdir="$$TF_DIR" import -input=false module.infrastructure_base.aws_s3_bucket.gitlab_storage gitlab-storage-local >/dev/null 2>&1 || true; \
 	    sleep 30; \
 	  done; \

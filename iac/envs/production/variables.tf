@@ -5,9 +5,9 @@ variable "cluster_name" {
 }
 
 variable "cluster_domain" {
-  description = "Base domain for all cluster services (e.g. maze.tech). DNS must resolve auth.<domain>, scm.<domain>, etc. to the cluster."
+  description = "Base domain for all cluster services (e.g. maze.trading). DNS must resolve auth.<domain>, scm.<domain>, etc. to the cluster LB."
   type        = string
-  default     = "maze.tech"
+  default     = "maze.trading"
 }
 
 variable "kubeconfig_path" {
@@ -28,9 +28,9 @@ variable "storage_nodes" {
     devices = list(string)
   }))
   default = [
-    { name = "node1", devices = ["/dev/sdb"] },
-    { name = "node2", devices = ["/dev/sdb"] },
-    { name = "node3", devices = ["/dev/sdb"] },
+    { name = "bm-01", devices = ["/dev/sdb"] },
+    { name = "bm-02", devices = ["/dev/sdb"] },
+    { name = "bm-03", devices = ["/dev/sdb"] },
   ]
 }
 

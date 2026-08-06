@@ -145,7 +145,7 @@ resource "aws_s3_bucket_versioning" "cluster_backup" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.2"
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.3"
 
   providers = {
     aws.rgw = aws.rgw
@@ -173,19 +173,22 @@ module "infrastructure_base" {
   osd_max_backfills        = 1
   rook_monitoring_enabled  = false
 
-  # Cert-manager / ingress — Let's Encrypt + LoadBalancer
+  # Cert-manager / ingress — Let's Encrypt + NodePort (OVH Public Cloud LB → node :30080/:30443)
   letsencrypt_email          = var.letsencrypt_email
   letsencrypt_server         = "https://acme-v02.api.letsencrypt.org/directory"
   cert_manager_replica_count = 3
-  ingress_service_type       = "LoadBalancer"
+  ingress_service_type       = "NodePort"
+  ingress_node_port_http     = 30080
+  ingress_node_port_https    = 30443
   ingress_replica_count      = 3
   enable_ingress_metrics     = true
 
-  # WireGuard
+  # WireGuard — NodePort UDP (no MetalLB; point vpn.<domain> at a node public IP or UDP LB)
   vpn_subnet             = var.vpn_subnet
   wireguard_server_url   = var.wireguard_server_url
   wireguard_peers        = var.wireguard_peers
-  wireguard_service_type = "LoadBalancer"
+  wireguard_service_type = "NodePort"
+  wireguard_node_port    = 31820
 
   # Keycloak — OVH managed PostgreSQL
   keycloak_admin_username        = var.keycloak_admin_username

@@ -63,10 +63,9 @@ Control-plane taints are removed so all three nodes schedule workloads.
 
 ## Ingress / Load Balancer
 
-OpenTofu production currently uses `LoadBalancer` for ingress. With a cloud LB
-in front of the nodes, switch ingress to **NodePort** or **hostNetwork** and
-point LB members at each node's private IP `:80`/`:443`. DNS should target
-`LB_FLOATING_IP` from inventory.
+OpenTofu production uses **NodePort** for ingress (30080/30443) and WireGuard
+(31820/udp). Point the OVH Public Cloud LB floating IP at each node's private
+IP on those ports (not :80/:443). DNS for `*.maze.trading` → that floating IP.
 
 MetalLB is **not** required when using an external cloud LB.
 

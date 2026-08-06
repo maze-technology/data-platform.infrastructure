@@ -3,7 +3,8 @@
 
 # ── Cluster domain ───────────────────────────────────────────────────────────
 # All services: auth.<domain>, scm.<domain>, vpn.<domain>, etc.
-cluster_domain = "maze.tech"
+# DNS A/AAAA for *.maze.trading → OVH LB floating IP; LB backends = node:30080 / :30443
+cluster_domain = "maze.trading"
 
 # ── Kubernetes access ────────────────────────────────────────────────────────
 kubeconfig_context = "production"
@@ -14,22 +15,22 @@ kubeconfig_context = "production"
 # bootstrap_admin = {
 #   username = "admin"
 #   password = "..."
-#   email    = "admin@maze.tech"
+#   email    = "admin@maze.trading"
 # }
 
 # ── WireGuard ────────────────────────────────────────────────────────────────
-# Defaults to vpn.<cluster_domain> — ensure DNS points to your public IP
-# wireguard_server_url = "vpn.prod.maze.tech"
+# Defaults to vpn.<cluster_domain> — UDP NodePort 31820 (no MetalLB)
+# wireguard_server_url = "vpn.maze.trading"
 
 # ── Rook-Ceph storage ────────────────────────────────────────────────────────
-# storage_nodes = [
-#   { name = "bm-node-01", devices = ["/dev/sdb"] },
-#   { name = "bm-node-02", devices = ["/dev/sdb"] },
-#   { name = "bm-node-03", devices = ["/dev/sdb"] },
-# ]
+storage_nodes = [
+  { name = "bm-01", devices = ["/dev/sdb"] },
+  { name = "bm-02", devices = ["/dev/sdb"] },
+  { name = "bm-03", devices = ["/dev/sdb"] },
+]
 
 # ── TLS ──────────────────────────────────────────────────────────────────────
-# letsencrypt_email = "admin@maze.tech"
+# letsencrypt_email = "admin@maze.trading"
 
 # ── Keycloak database (OVH managed PostgreSQL) ───────────────────────────────
 # keycloak_postgresql_host     = "postgresql-xxxxx.database.cloud.ovh.net"
@@ -40,7 +41,7 @@ kubeconfig_context = "production"
 # gitlab_postgresql_password = "..."
 
 # ── Vault ────────────────────────────────────────────────────────────────────
-# vault_token = "..."
+# vault_token = "..."  # from vault operator init (production is HA raft, not dev root)
 
 # ── Cluster backup (Velero + Kopia + RGW mirror → OVH Object Storage) ────────
 # On by default. OpenTofu creates the OVH bucket and enables versioning.

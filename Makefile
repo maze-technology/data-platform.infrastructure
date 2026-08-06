@@ -4,6 +4,7 @@
 .PHONY: ensure-rook-crds
 .PHONY: prepull-ceph-image
 .PHONY: setup-loop-devices teardown-loop-devices
+.PHONY: bare-metal-host-basics bare-metal-kube-packages bare-metal-cluster bare-metal-bootstrap
 
 # Variables
 CLUSTER_NAME ?= local
@@ -529,3 +530,18 @@ prepull-ceph-image: ## Pre-pull Ceph image with resumable download (handles netw
 		echo "  Or wait for the automatic retry in make apply-foundation"; \
 		exit $$EXIT_CODE; \
 	fi
+
+# Bare-metal OVH bootstrap (see docs/bare-metal.md)
+bare-metal-host-basics: ## apt/upgrade, firewall, sysctl, hostnames on all BM
+	@SSH_KEY=$${SSH_KEY:-$$HOME/.ssh/ovh_maze} ./scripts/bare-metal/01-host-basics.sh --remote
+
+bare-metal-kube-packages: ## containerd + kubeadm/kubelet/kubectl on all BM
+	@SSH_KEY=$${SSH_KEY:-$$HOME/.ssh/ovh_maze} ./scripts/bare-metal/02-containerd-kubeadm.sh --remote
+
+bare-metal-cluster: ## kubeadm HA init/join + Cilium
+	@SSH_KEY=$${SSH_KEY:-$$HOME/.ssh/ovh_maze} ./scripts/bare-metal/03-kubeadm-cluster.sh --remote
+
+bare-metal-bootstrap: ## Full bare-metal host prep + Kubernetes cluster
+	@$(MAKE) bare-metal-host-basics
+	@$(MAKE) bare-metal-kube-packages
+	@$(MAKE) bare-metal-cluster

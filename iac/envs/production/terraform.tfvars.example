@@ -2,12 +2,38 @@
 # DO NOT commit terraform.tfvars with secrets
 
 # ── Cluster domain ───────────────────────────────────────────────────────────
-# All services: auth.<domain>, scm.<domain>, vpn.<domain>, etc.
 # DNS A/AAAA for *.maze.trading → OVH LB floating IP; LB backends = node:30080 / :30443
 cluster_domain = "maze.trading"
 
 # ── Kubernetes access ────────────────────────────────────────────────────────
 kubeconfig_context = "production"
+
+# ── OVH API (or export OVH_APPLICATION_KEY / SECRET / CONSUMER_KEY) ───────────
+# Create tokens at https://api.ovh.com/createToken/
+# Rights needed: GET/POST/PUT/DELETE on /cloud/project/<id>/*
+ovh_cloud_project_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# ovh_endpoint           = "ovh-eu"
+# ovh_application_key    = "..."
+# ovh_application_secret = "..."
+# ovh_consumer_key       = "..."
+
+# Managed PostgreSQL (created by OpenTofu — Keycloak + GitLab DBs/users)
+# ovh_postgresql_region  = "UK"
+# ovh_postgresql_plan    = "essential"   # or business / enterprise
+# ovh_postgresql_flavor  = "db1-7"
+# ovh_postgresql_version = "16"
+ovh_database_allowed_cidrs = [
+  { description = "bm-01-public", cidr = "x.x.x.x/32" },
+  { description = "bm-02-public", cidr = "x.x.x.x/32" },
+  { description = "bm-03-public", cidr = "x.x.x.x/32" },
+  { description = "jump-host", cidr = "x.x.x.x/32" },
+  { description = "vrack-private", cidr = "192.168.0.0/16" },
+]
+
+# Object Storage for Velero (created by OpenTofu)
+# ovh_object_storage_region = "GRA"
+backup_s3_bucket = "maze-cluster-backup-production"
+# backup_encryption_password = "..."  # openssl rand -base64 32 — store offline
 
 # ── Bootstrap admin (configure BEFORE first deploy) ──────────────────────────
 # keycloak_admin_username = "admin"
@@ -18,10 +44,6 @@ kubeconfig_context = "production"
 #   email    = "admin@maze.trading"
 # }
 
-# ── WireGuard ────────────────────────────────────────────────────────────────
-# Defaults to vpn.<cluster_domain> — UDP NodePort 31820 (no MetalLB)
-# wireguard_server_url = "vpn.maze.trading"
-
 # ── Rook-Ceph storage ────────────────────────────────────────────────────────
 storage_nodes = [
   { name = "bm-01", devices = ["/dev/sdb"] },
@@ -31,33 +53,3 @@ storage_nodes = [
 
 # ── TLS ──────────────────────────────────────────────────────────────────────
 # letsencrypt_email = "admin@maze.trading"
-
-# ── Keycloak database (OVH managed PostgreSQL) ───────────────────────────────
-# keycloak_postgresql_host     = "postgresql-xxxxx.database.cloud.ovh.net"
-# keycloak_postgresql_password = "..."
-
-# ── GitLab databases (OVH managed) ───────────────────────────────────────────
-# gitlab_postgresql_host     = "postgresql-xxxxx.database.cloud.ovh.net"
-# gitlab_postgresql_password = "..."
-
-# ── Vault ────────────────────────────────────────────────────────────────────
-# vault_token = "..."  # from vault operator init (production is HA raft, not dev root)
-
-# ── Cluster backup (Velero + Kopia + RGW mirror → OVH Object Storage) ────────
-# On by default. OpenTofu creates the OVH bucket and enables versioning.
-# Required secrets in terraform.tfvars:
-#   openssl rand -base64 32   # → backup_encryption_password (store offline)
-#
-# External resources (e.g. OVH managed PostgreSQL for GitLab/Keycloak) are NOT
-# backed up by this stack — the person running the infrastructure must handle those.
-backup_enabled             = true
-backup_s3_bucket           = "maze-cluster-backup-production"
-backup_s3_endpoint         = "https://s3.gra.io.cloud.ovh.net"
-backup_s3_region           = "gra"
-# backup_s3_access_key       = "..."
-# backup_s3_secret_key       = "..."
-# backup_encryption_password = "REPLACE-WITH-openssl-rand-base64-32"
-# backup_schedule_cron       = "0 2 * * *"
-# backup_ttl                 = "720h"   # retain 30 days
-# backup_object_sync_enabled = true
-# backup_object_sync_schedule_cron = "30 2 * * *"

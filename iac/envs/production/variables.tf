@@ -118,25 +118,41 @@ variable "wireguard_peers" {
 }
 
 variable "keycloak_postgresql_host" {
-  description = "OVH managed PostgreSQL endpoint for Keycloak"
+  description = "Override OVH-managed Keycloak PostgreSQL host (empty = use ovh.tf endpoint)"
   type        = string
+  default     = ""
+}
+
+variable "keycloak_postgresql_port" {
+  description = "Override OVH-managed Keycloak PostgreSQL port (0 = use ovh.tf endpoint)"
+  type        = number
+  default     = 0
 }
 
 variable "keycloak_postgresql_password" {
-  description = "OVH managed PostgreSQL password for Keycloak"
+  description = "Override OVH-managed Keycloak PostgreSQL password (empty = use ovh.tf user password)"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 variable "gitlab_postgresql_host" {
-  description = "OVH managed PostgreSQL endpoint for GitLab"
+  description = "Override OVH-managed GitLab PostgreSQL host (empty = use ovh.tf endpoint)"
   type        = string
+  default     = ""
+}
+
+variable "gitlab_postgresql_port" {
+  description = "Override OVH-managed GitLab PostgreSQL port (0 = use ovh.tf endpoint)"
+  type        = number
+  default     = 0
 }
 
 variable "gitlab_postgresql_password" {
-  description = "OVH managed PostgreSQL password for GitLab"
+  description = "Override OVH-managed GitLab PostgreSQL password (empty = use ovh.tf user password)"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 # =============================================================================
@@ -162,26 +178,26 @@ variable "backup_s3_prefix" {
 }
 
 variable "backup_s3_region" {
-  description = "OVH Object Storage region code (e.g. gra, sbg, de, uk, waw, bhs)"
+  description = "Deprecated override — prefer ovh_object_storage_region. Empty uses OVH region."
   type        = string
-  default     = "gra"
+  default     = ""
 }
 
 variable "backup_s3_endpoint" {
-  description = "OVH S3 endpoint URL"
+  description = "Override S3 endpoint (empty = https://s3.<ovh_object_storage_region>.io.cloud.ovh.net)"
   type        = string
-  default     = "https://s3.gra.io.cloud.ovh.net"
+  default     = ""
 }
 
 variable "backup_s3_access_key" {
-  description = "OVH Object Storage S3 access key (required when backup_enabled)"
+  description = "Override OVH S3 access key (empty = use ovh.tf credential)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "backup_s3_secret_key" {
-  description = "OVH Object Storage S3 secret key (required when backup_enabled)"
+  description = "Override OVH S3 secret key (empty = use ovh.tf credential)"
   type        = string
   sensitive   = true
   default     = ""
@@ -217,3 +233,83 @@ variable "backup_object_sync_schedule_cron" {
   type        = string
   default     = "30 2 * * *"
 }
+
+# =============================================================================
+# OVH Public Cloud (provider + managed Postgres + Object Storage)
+# =============================================================================
+
+variable "ovh_endpoint" {
+  description = "OVH API endpoint (ovh-eu, ovh-ca, ovh-us). Empty uses OVH_ENDPOINT env."
+  type        = string
+  default     = "ovh-eu"
+}
+
+variable "ovh_application_key" {
+  description = "OVH API application key (or OVH_APPLICATION_KEY env)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_application_secret" {
+  description = "OVH API application secret (or OVH_APPLICATION_SECRET env)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_consumer_key" {
+  description = "OVH API consumer key (or OVH_CONSUMER_KEY env)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_cloud_project_id" {
+  description = "OVH Public Cloud project ID (service_name)"
+  type        = string
+}
+
+variable "ovh_postgresql_region" {
+  description = "Region for managed PostgreSQL nodes (e.g. UK, GRA)"
+  type        = string
+  default     = "UK"
+}
+
+variable "ovh_postgresql_version" {
+  description = "Managed PostgreSQL major version"
+  type        = string
+  default     = "16"
+}
+
+variable "ovh_postgresql_plan" {
+  description = "Managed PostgreSQL plan: essential (1 node), business (2), enterprise (3)"
+  type        = string
+  default     = "essential"
+
+  validation {
+    condition     = contains(["essential", "business", "enterprise"], var.ovh_postgresql_plan)
+    error_message = "ovh_postgresql_plan must be essential, business, or enterprise."
+  }
+}
+
+variable "ovh_postgresql_flavor" {
+  description = "Managed PostgreSQL node flavor (e.g. db1-4, db1-7)"
+  type        = string
+  default     = "db1-7"
+}
+
+variable "ovh_database_allowed_cidrs" {
+  description = "CIDRs allowed to reach managed PostgreSQL (bare-metal public IPs + jump + private net)"
+  type = list(object({
+    description = string
+    cidr        = string
+  }))
+}
+
+variable "ovh_object_storage_region" {
+  description = "Object Storage region name (uppercase in OVH API, e.g. GRA)"
+  type        = string
+  default     = "GRA"
+}
+

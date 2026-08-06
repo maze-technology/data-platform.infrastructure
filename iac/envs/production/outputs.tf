@@ -69,3 +69,14 @@ output "backup_schedule" {
   sensitive   = true
   value       = module.infrastructure_base.backup_schedule
 }
+
+output "ovh_postgresql_endpoint" {
+  description = "OVH managed PostgreSQL host:port used by Keycloak and GitLab"
+  value       = "${local.pg_endpoint.domain}:${local.pg_endpoint.port}"
+}
+
+output "ovh_backup_bucket" {
+  description = "OVH Object Storage bucket for cluster backups"
+  value       = local.backup_s3_bucket
+}
+

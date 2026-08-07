@@ -94,8 +94,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.17 — Loki RGW extraEnv, GitLab ingress, Promtail inotify, bundled PG
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.17"
+  # infrastructure-base v0.1.20 — DNS-01 ACME, VPN CoreDNS, ClusterIP ingress
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.20"
 
   providers = {
     aws.rgw = aws.rgw
@@ -105,7 +105,7 @@ module "infrastructure_base" {
   cluster_name        = var.cluster_name
   cluster_domain      = var.cluster_domain
   enable_kind_cluster = false
-  enable_cluster_dns  = false
+  enable_cluster_dns  = true
   create_maze_ca      = false
   restrict_to_vpn     = true
 
@@ -123,22 +123,28 @@ module "infrastructure_base" {
   osd_max_backfills        = 1
   rook_monitoring_enabled  = false
 
-  # Cert-manager / ingress — Let's Encrypt + NodePort (OVH Public Cloud LB → node :30080/:30443)
+  # Cert-manager — Let's Encrypt DNS-01 via OVH (no public HTTP)
   letsencrypt_email          = var.letsencrypt_email
   letsencrypt_server         = "https://acme-v02.api.letsencrypt.org/directory"
   cert_manager_replica_count = 3
-  ingress_service_type       = "NodePort"
-  ingress_node_port_http     = 30080
-  ingress_node_port_https    = 30443
-  ingress_replica_count      = 3
-  enable_ingress_metrics     = true
+  acme_solver                = "dns01"
+  ovh_dns_application_key    = var.ovh_application_key
+  ovh_dns_application_secret = var.ovh_application_secret
+  ovh_dns_consumer_key       = var.ovh_consumer_key
+  ovh_dns_endpoint_name      = var.ovh_endpoint != "" ? var.ovh_endpoint : "ovh-eu"
+  ovh_dns_webhook_group_name = "acme.${var.cluster_domain}"
 
-  # WireGuard — NodePort UDP (no MetalLB; point vpn.<domain> at a node public IP or UDP LB)
+  # Ingress — ClusterIP only (reachable via WireGuard + CoreDNS, not the public LB)
+  ingress_service_type   = "ClusterIP"
+  ingress_replica_count  = 3
+  enable_ingress_metrics = true
+
+  # WireGuard — NodePort UDP behind OVH Public Cloud LB
   vpn_subnet             = var.vpn_subnet
   wireguard_server_url   = var.wireguard_server_url
   wireguard_peers        = var.wireguard_peers
   wireguard_service_type = "NodePort"
-  wireguard_node_port    = 31820
+  wireguard_node_port    = var.wireguard_node_port
 
   # Keycloak — OVH managed PostgreSQL (provisioned in ovh.tf)
   keycloak_admin_username = var.keycloak_admin_username

@@ -63,11 +63,16 @@ Control-plane taints are removed so all three nodes schedule workloads.
 
 ## Ingress / Load Balancer
 
-OpenTofu production uses **NodePort** for ingress (30080/30443) and WireGuard
-(31820/udp). Point the OVH Public Cloud LB floating IP at each node's private
-IP on those ports (not :80/:443). DNS for `*.maze.trading` → that floating IP.
+Production is **VPN-only** on the public internet:
 
-MetalLB is **not** required when using an external cloud LB.
+- OVH Public Cloud LB (managed in OpenTofu `ovh_lb.tf`) exposes **UDP 31820** only
+  (WireGuard NodePort) to the three bare-metal private IPs.
+- Ingress-nginx is **ClusterIP**; app hostnames resolve via WireGuard DNS → CoreDNS →
+  that ClusterIP. There is no public HTTP/HTTPS listener.
+- TLS is Let's Encrypt **DNS-01** (OVH DNS webhook) — no ACME HTTP-01 on :80.
+
+DNS: `vpn.maze.trading` → LB floating IP. App names (`scm`, `auth`, …) need not be
+public; VPN clients resolve them through CoreDNS.
 
 ## External backups
 

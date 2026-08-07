@@ -141,14 +141,14 @@ module "infrastructure_base" {
   wireguard_node_port    = 31820
 
   # Keycloak — OVH managed PostgreSQL (provisioned in ovh.tf)
-  keycloak_admin_username        = var.keycloak_admin_username
-  keycloak_admin_password        = var.keycloak_admin_password
-  bootstrap_admin                = var.bootstrap_admin
-  bootstrap_users                = var.bootstrap_users
-  keycloak_replica_count         = 2
+  keycloak_admin_username = var.keycloak_admin_username
+  keycloak_admin_password = var.keycloak_admin_password
+  bootstrap_admin         = var.bootstrap_admin
+  bootstrap_users         = var.bootstrap_users
+  keycloak_replica_count  = 2
   # In-cluster Bitnami Postgres (Web Cloud dropped — GitLab already needs schemas;
   # keep one PG pattern for both apps).
-  use_external_keycloak_database = false
+  use_external_keycloak_database   = false
   keycloak_postgresql_storage_size = "20Gi"
 
   # Vault HA on Rook RBD
@@ -176,12 +176,12 @@ module "infrastructure_base" {
   gitlab_postgresql_ssl          = false
   gitlab_postgresql_storage_size = "50Gi"
   # Encrypted class needs CSI KMS ConfigMap wiring; use plain RBD until that lands.
-  gitaly_storage_class           = "rook-ceph-block"
-  gitaly_storage_size            = "100Gi"
-  valkey_storage_size            = "8Gi"
-  s3_force_destroy               = false
-  webservice_min_replicas        = 2
-  webservice_max_replicas        = 4
+  gitaly_storage_class    = "rook-ceph-block"
+  gitaly_storage_size     = "100Gi"
+  valkey_storage_size     = "8Gi"
+  s3_force_destroy        = false
+  webservice_min_replicas = 2
+  webservice_max_replicas = 4
 
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled

@@ -94,8 +94,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.20 — DNS-01 ACME, VPN CoreDNS, ClusterIP ingress
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.20"
+  # infrastructure-base v0.1.21 — WireGuard AppArmor unconfined + DNS-01 / VPN CoreDNS
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.21"
 
   providers = {
     aws.rgw = aws.rgw

@@ -17,22 +17,25 @@ ovh_cloud_project_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # ovh_application_secret = "..."
 # ovh_consumer_key       = "..."
 
-# Managed PostgreSQL (created by OpenTofu — Keycloak + GitLab DBs/users)
-# ovh_postgresql_region  = "UK"
-# ovh_postgresql_plan    = "essential"   # or business / enterprise
-# ovh_postgresql_flavor  = "db1-7"
-# ovh_postgresql_version = "16"
-ovh_database_allowed_cidrs = [
-  { description = "bm-01-public", cidr = "x.x.x.x/32" },
-  { description = "bm-02-public", cidr = "x.x.x.x/32" },
-  { description = "bm-03-public", cidr = "x.x.x.x/32" },
-  { description = "jump-host", cidr = "x.x.x.x/32" },
-  { description = "vrack-private", cidr = "192.168.0.0/16" },
-]
+# ── PostgreSQL ───────────────────────────────────────────────────────────────
+# Production uses in-cluster Bitnami Postgres for Keycloak and GitLab.
+# Optional overrides (defaults are fine for in-cluster):
+# gitlab_postgresql_username = "gitlab"
+# gitlab_postgresql_database = "gitlabhq_production"
+# gitlab_postgresql_password = "..."
+# External PG (unused unless use_external_* is true in main.tf):
+# keycloak_postgresql_host / port / username / database / password
+# gitlab_postgresql_host / port
+
+# Legacy Public Cloud managed PostgreSQL vars (unused — removed from ovh.tf)
+# ovh_postgresql_region / plan / flavor / version / ovh_database_allowed_cidrs
+
 
 # Object Storage for Velero (created by OpenTofu)
-# ovh_object_storage_region = "GRA"
-backup_s3_bucket = "maze-cluster-backup-production"
+# ovh_object_storage_region    = "GRA"
+# ovh_object_storage_dr_region = "SBG"
+backup_s3_bucket    = "maze-cluster-backup-production"
+# backup_s3_dr_bucket = "maze-cluster-backup-production-sbg"
 # backup_encryption_password = "..."  # openssl rand -base64 32 — store offline
 
 # ── Bootstrap admin (configure BEFORE first deploy) ──────────────────────────

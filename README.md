@@ -91,9 +91,11 @@ Velero + Kopia (encrypted PVC backups) and rclone crypt mirror of RGW buckets (G
 | Env | Object store | Notes |
 |-----|--------------|-------|
 | `local` | RGW bucket `cluster-backup-local` (same Ceph) | Smoke only. Makefile passes RGW keys during `apply-services`. |
-| `production` | OVH Object Storage (S3) | **On by default.** OpenTofu creates the bucket + versioning via `aws.backup`. Set OVH keys + `backup_encryption_password` in tfvars. |
+| `production` | OVH Object Storage (S3) | **On by default.** OpenTofu creates the GRA primary bucket (via `ovh_cloud_project_storage`) and an **SBG DR** bucket. GRA→SBG uses OVH async replication. Set OVH keys + `backup_encryption_password` in tfvars. |
 
-**External resources** (e.g. managed PostgreSQL for GitLab/Keycloak, or anything else provisioned outside this stack) are **not** covered by Velero/rclone. Backing those up is the responsibility of the person running the infrastructure.
+Keycloak and GitLab use in-cluster Postgres; their PVCs are covered by Velero/Kopia (same as other stateful apps).
+
+**Restore from DR:** retarget tools to the SBG endpoint (`ovh_backup_dr_endpoint` output) with the same keys/password.
 
 ## Related
 

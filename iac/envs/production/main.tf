@@ -94,8 +94,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.4 — external PG port/SSL + OVH wiring
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.5"
+  # infrastructure-base v0.1.17 — Loki RGW extraEnv, GitLab ingress, Promtail inotify, bundled PG
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.17"
 
   providers = {
     aws.rgw = aws.rgw
@@ -146,13 +146,10 @@ module "infrastructure_base" {
   bootstrap_admin                = var.bootstrap_admin
   bootstrap_users                = var.bootstrap_users
   keycloak_replica_count         = 2
-  use_external_keycloak_database = true
-  keycloak_postgresql_host       = local.keycloak_pg_host
-  keycloak_postgresql_port       = local.keycloak_pg_port
-  keycloak_postgresql_username   = ovh_cloud_project_database_postgresql_user.keycloak.name
-  keycloak_postgresql_database   = ovh_cloud_project_database_database.keycloak.name
-  keycloak_postgresql_password   = local.keycloak_pg_pass
-  keycloak_postgresql_ssl        = true
+  # In-cluster Bitnami Postgres (Web Cloud dropped — GitLab already needs schemas;
+  # keep one PG pattern for both apps).
+  use_external_keycloak_database = false
+  keycloak_postgresql_storage_size = "20Gi"
 
   # Vault HA on Rook RBD
   vault_replica_count   = 3
@@ -170,14 +167,16 @@ module "infrastructure_base" {
   argocd_replica_count = 3
   argocd_enable_ha     = true
 
-  # GitLab — external PostgreSQL + encrypted Gitaly
-  use_external_gitlab_postgresql = true
-  gitlab_postgresql_host         = local.gitlab_pg_host
-  gitlab_postgresql_port         = local.gitlab_pg_port
-  gitlab_postgresql_username     = ovh_cloud_project_database_postgresql_user.gitlab.name
-  gitlab_postgresql_database     = ovh_cloud_project_database_database.gitlab.name
+  # GitLab — in-cluster Postgres (Web Cloud PG forbids CREATE SCHEMA; GitLab needs
+  # gitlab_partitions_* schemas). Keycloak uses in-cluster PG as well.
+  use_external_gitlab_postgresql = false
+  gitlab_postgresql_username     = local.gitlab_pg_user
+  gitlab_postgresql_database     = local.gitlab_pg_db
   gitlab_postgresql_password     = local.gitlab_pg_pass
-  gitlab_postgresql_ssl          = true
+  gitlab_postgresql_ssl          = false
+  gitlab_postgresql_storage_size = "50Gi"
+  # Encrypted class needs CSI KMS ConfigMap wiring; use plain RBD until that lands.
+  gitaly_storage_class           = "rook-ceph-block"
   gitaly_storage_size            = "100Gi"
   valkey_storage_size            = "8Gi"
   s3_force_destroy               = false
@@ -201,12 +200,8 @@ module "infrastructure_base" {
   backup_object_sync_schedule_cron   = var.backup_object_sync_schedule_cron
 
   depends_on = [
-    ovh_cloud_project_database.maze,
-    ovh_cloud_project_database_database.keycloak,
-    ovh_cloud_project_database_database.gitlab,
-    ovh_cloud_project_database_postgresql_user.keycloak,
-    ovh_cloud_project_database_postgresql_user.gitlab,
     ovh_cloud_project_storage.backup,
+    ovh_cloud_project_storage.backup_dr,
     ovh_cloud_project_user_s3_credential.backup,
   ]
 }

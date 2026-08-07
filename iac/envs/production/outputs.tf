@@ -70,13 +70,18 @@ output "backup_schedule" {
   value       = module.infrastructure_base.backup_schedule
 }
 
-output "ovh_postgresql_endpoint" {
-  description = "OVH managed PostgreSQL host:port used by Keycloak and GitLab"
-  value       = "${local.pg_endpoint.domain}:${local.pg_endpoint.port}"
+output "ovh_backup_bucket" {
+  description = "OVH Object Storage primary bucket for cluster backups (GRA)"
+  value       = local.backup_s3_bucket
 }
 
-output "ovh_backup_bucket" {
-  description = "OVH Object Storage bucket for cluster backups"
-  value       = local.backup_s3_bucket
+output "ovh_backup_dr_bucket" {
+  description = "OVH Object Storage DR bucket (SBG), fed by async replication from GRA"
+  value       = local.backup_s3_dr_bucket
+}
+
+output "ovh_backup_dr_endpoint" {
+  description = "S3 endpoint for the DR backup bucket"
+  value       = local.backup_s3_dr_endpoint
 }
 

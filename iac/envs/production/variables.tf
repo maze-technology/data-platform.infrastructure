@@ -117,39 +117,64 @@ variable "wireguard_peers" {
   default     = ""
 }
 
+# Optional external-PG overrides (unused when apps use in-cluster Bitnami Postgres).
 variable "keycloak_postgresql_host" {
-  description = "Override OVH-managed Keycloak PostgreSQL host (empty = use ovh.tf endpoint)"
+  description = "External Keycloak PostgreSQL host (empty = in-cluster)"
   type        = string
   default     = ""
 }
 
 variable "keycloak_postgresql_port" {
-  description = "Override OVH-managed Keycloak PostgreSQL port (0 = use ovh.tf endpoint)"
+  description = "External Keycloak PostgreSQL port"
   type        = number
   default     = 0
 }
 
+variable "keycloak_postgresql_username" {
+  description = "Keycloak PostgreSQL username"
+  type        = string
+  default     = "keycloak"
+}
+
+variable "keycloak_postgresql_database" {
+  description = "Keycloak PostgreSQL database name"
+  type        = string
+  default     = "keycloak"
+}
+
 variable "keycloak_postgresql_password" {
-  description = "Override OVH-managed Keycloak PostgreSQL password (empty = use ovh.tf user password)"
+  description = "Keycloak PostgreSQL password (in-cluster or external)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "gitlab_postgresql_host" {
-  description = "Override OVH-managed GitLab PostgreSQL host (empty = use ovh.tf endpoint)"
+  description = "External GitLab PostgreSQL host (empty = in-cluster)"
   type        = string
   default     = ""
 }
 
 variable "gitlab_postgresql_port" {
-  description = "Override OVH-managed GitLab PostgreSQL port (0 = use ovh.tf endpoint)"
+  description = "External GitLab PostgreSQL port"
   type        = number
-  default     = 0
+  default     = 5432
+}
+
+variable "gitlab_postgresql_username" {
+  description = "GitLab PostgreSQL username"
+  type        = string
+  default     = "gitlab"
+}
+
+variable "gitlab_postgresql_database" {
+  description = "GitLab PostgreSQL database name"
+  type        = string
+  default     = "gitlabhq_production"
 }
 
 variable "gitlab_postgresql_password" {
-  description = "Override OVH-managed GitLab PostgreSQL password (empty = use ovh.tf user password)"
+  description = "GitLab PostgreSQL password (in-cluster or external)"
   type        = string
   sensitive   = true
   default     = ""
@@ -296,20 +321,33 @@ variable "ovh_postgresql_plan" {
 variable "ovh_postgresql_flavor" {
   description = "Managed PostgreSQL node flavor (e.g. db1-4, db1-7)"
   type        = string
-  default     = "db1-7"
+  default     = "db1-4"
 }
 
 variable "ovh_database_allowed_cidrs" {
-  description = "CIDRs allowed to reach managed PostgreSQL (bare-metal public IPs + jump + private net)"
+  description = "Unused (legacy Public Cloud managed PostgreSQL allowlist). Kept for tfvars compatibility."
   type = list(object({
     description = string
     cidr        = string
   }))
+  default = []
 }
 
 variable "ovh_object_storage_region" {
-  description = "Object Storage region name (uppercase in OVH API, e.g. GRA)"
+  description = "Object Storage region name for primary backups (uppercase in OVH API, e.g. GRA)"
   type        = string
   default     = "GRA"
+}
+
+variable "ovh_object_storage_dr_region" {
+  description = "Object Storage region for DR replica bucket (uppercase, e.g. SBG)"
+  type        = string
+  default     = "SBG"
+}
+
+variable "backup_s3_dr_bucket" {
+  description = "OVH Object Storage DR bucket name (created in ovh_object_storage_dr_region)"
+  type        = string
+  default     = "maze-cluster-backup-production-sbg"
 }
 

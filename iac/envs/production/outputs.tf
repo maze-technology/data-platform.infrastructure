@@ -13,6 +13,16 @@ output "wireguard_peer_config_command" {
   value       = module.infrastructure_base.wireguard_peer_config_command
 }
 
+output "ovh_lb_floating_ip" {
+  description = "Public VIP for WireGuard (vpn.<domain> DNS → this address, UDP only)"
+  value       = try(ovh_cloud_project_loadbalancer.vpn[0].floating_ip.ip, null)
+}
+
+output "ovh_lb_id" {
+  description = "OVH Public Cloud Load Balancer ID"
+  value       = try(ovh_cloud_project_loadbalancer.vpn[0].id, null)
+}
+
 output "cosign_vault_path" {
   description = "Vault path for cosign signing keys (private_key, public_key, password)"
   value       = module.infrastructure_base.cosign_vault_path

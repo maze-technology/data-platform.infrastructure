@@ -2,20 +2,29 @@
 # DO NOT commit terraform.tfvars with secrets
 
 # ── Cluster domain ───────────────────────────────────────────────────────────
-# DNS A/AAAA for *.maze.trading → OVH LB floating IP; LB backends = node:30080 / :30443
+# Public DNS: vpn.maze.trading → OVH LB floating IP (UDP 31820 only).
+# App hostnames resolve via WireGuard DNS → CoreDNS (no public HTTP/HTTPS).
 cluster_domain = "maze.trading"
 
 # ── Kubernetes access ────────────────────────────────────────────────────────
 kubeconfig_context = "production"
 
-# ── OVH API (or export OVH_APPLICATION_KEY / SECRET / CONSUMER_KEY) ───────────
-# Create tokens at https://api.ovh.com/createToken/
-# Rights needed: GET/POST/PUT/DELETE on /cloud/project/<id>/*
+# ── OVH API (or export OVH_* ; Makefile maps them to TF_VAR_ovh_*) ────────────
+# https://api.ovh.com/createToken/
+# Rights: /cloud/project/<id>/* AND DNS-01:
+#   GET/PUT/POST/DELETE /domain/zone/*
+#   GET/PUT/POST/DELETE /domain/zone/<zone>/*
 ovh_cloud_project_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # ovh_endpoint           = "ovh-eu"
 # ovh_application_key    = "..."
 # ovh_application_secret = "..."
 # ovh_consumer_key       = "..."
+
+# ── Public Cloud LB (WireGuard UDP only; managed in ovh_lb.tf) ───────────────
+# ovh_lb_enabled = true
+# ovh_lb_region = "UK1"
+# ovh_lb_floating_ip_id = "..."  # keep existing VIP
+# ovh_lb_gateway_id     = "..."
 
 # ── PostgreSQL ───────────────────────────────────────────────────────────────
 # Production uses in-cluster Bitnami Postgres for Keycloak and GitLab.

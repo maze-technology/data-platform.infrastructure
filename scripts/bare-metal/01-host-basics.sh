@@ -81,11 +81,10 @@ ufw allow from "${VRACK_CIDR}" to any port 2379:2380 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10250 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10257 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10259 proto tcp
-# NodePort range (cloud LB health + services)
+# NodePort range — TCP kept for optional diagnostics; WireGuard needs UDP.
 ufw allow 30000:32767/tcp
-# HTTP/HTTPS (ingress / LB backends)
-ufw allow 80/tcp
-ufw allow 443/tcp
+ufw allow 31820/udp comment 'wireguard'
+# HTTP/HTTPS not exposed publicly (VPN-only + DNS-01). Still allow from vRack for node health.
 # Cilium / VXLAN / health (adjust if CNI changes)
 ufw allow 8472/udp
 ufw allow 4240/tcp

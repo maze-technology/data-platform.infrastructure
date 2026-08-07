@@ -77,6 +77,18 @@ variable "wireguard_server_url" {
   default     = ""
 }
 
+variable "wireguard_node_port" {
+  description = "UDP NodePort for WireGuard (public LB listener port)"
+  type        = number
+  default     = 31820
+}
+
+variable "wireguard_peers" {
+  description = "Comma-separated WireGuard peer names (defaults to bootstrap_admin.username)"
+  type        = string
+  default     = ""
+}
+
 variable "keycloak_admin_username" {
   description = "Keycloak master realm admin username"
   type        = string
@@ -109,12 +121,6 @@ variable "bootstrap_users" {
   }))
   sensitive = true
   default   = []
-}
-
-variable "wireguard_peers" {
-  description = "WireGuard peer names (defaults to bootstrap_admin.username)"
-  type        = string
-  default     = ""
 }
 
 # Optional external-PG overrides (unused when apps use in-cluster Bitnami Postgres).
@@ -293,6 +299,67 @@ variable "ovh_consumer_key" {
 variable "ovh_cloud_project_id" {
   description = "OVH Public Cloud project ID (service_name)"
   type        = string
+}
+
+variable "ovh_private_network_name" {
+  description = "Name of the OVH private network (vRack) used by the Public Cloud LB"
+  type        = string
+  default     = "maze-private-network"
+}
+
+variable "ovh_lb_enabled" {
+  description = "Manage the OVH Public Cloud Load Balancer (WireGuard UDP only)"
+  type        = bool
+  default     = true
+}
+
+variable "ovh_lb_region" {
+  description = "Region of the Public Cloud Load Balancer"
+  type        = string
+  default     = "UK1"
+}
+
+variable "ovh_lb_name" {
+  description = "Name of the Public Cloud Load Balancer"
+  type        = string
+  default     = "maze-public-lb"
+}
+
+variable "ovh_lb_flavor_name" {
+  description = "LB flavor name (small / medium / large / xl)"
+  type        = string
+  default     = "small"
+}
+
+variable "ovh_lb_floating_ip_id" {
+  description = "Existing floating IP UUID to keep on the LB (empty = create new)"
+  type        = string
+  default     = "140fbf29-8657-4366-a689-86af8ccaea2c"
+}
+
+variable "ovh_lb_gateway_id" {
+  description = "OVH gateway UUID associated with the LB floating IP"
+  type        = string
+  default     = "8e1f6f92-7420-41ae-a4b3-aadf28372192"
+}
+
+variable "ovh_lb_id" {
+  description = "Unused after recreate; kept for docs/inventory of prior LB UUID"
+  type        = string
+  default     = ""
+}
+
+variable "ovh_lb_backend_nodes" {
+  description = "Bare-metal private IPs behind the WireGuard UDP listener"
+  type = list(object({
+    name       = string
+    private_ip = string
+  }))
+  default = [
+    { name = "bm-01", private_ip = "192.168.10.1" },
+    { name = "bm-02", private_ip = "192.168.10.2" },
+    { name = "bm-03", private_ip = "192.168.10.3" },
+  ]
 }
 
 variable "ovh_postgresql_region" {

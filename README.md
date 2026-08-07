@@ -70,7 +70,8 @@ make init ENV=production
 make apply ENV=production
 ```
 
-Ingress should sit behind the cloud load balancer VIP from inventory (`LB_FLOATING_IP`); prefer NodePort/hostNetwork over MetalLB when using that LB.
+Ingress should sit behind WireGuard (VPN-only). The OVH Public Cloud LB VIP
+(`LB_FLOATING_IP`) exposes **UDP 31820** only; TLS is Let's Encrypt DNS-01.
 ## Providers
 
 This repo owns provider configuration:

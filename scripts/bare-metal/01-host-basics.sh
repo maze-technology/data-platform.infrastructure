@@ -93,6 +93,19 @@ ufw allow from "${VRACK_CIDR}"
 ufw --force enable
 ufw status verbose
 
+# Ubuntu 25+/26 AppArmor ships a wg-quick profile that breaks linuxserver
+# WireGuard in containers (busybox readlink → Permission denied). Disable it.
+if [[ -f /etc/apparmor.d/wg-quick ]]; then
+  mkdir -p /etc/apparmor.d/disable
+  ln -sfn /etc/apparmor.d/wg-quick /etc/apparmor.d/disable/wg-quick
+  apparmor_parser -R /etc/apparmor.d/wg-quick 2>/dev/null || true
+fi
+if [[ -f /etc/apparmor.d/wg ]]; then
+  mkdir -p /etc/apparmor.d/disable
+  ln -sfn /etc/apparmor.d/wg /etc/apparmor.d/disable/wg
+  apparmor_parser -R /etc/apparmor.d/wg 2>/dev/null || true
+fi
+
 echo "==> Host basics complete on $(hostname) (${PRIVATE_IP})"
 EOS
 )"

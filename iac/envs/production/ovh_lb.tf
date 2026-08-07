@@ -83,7 +83,8 @@ resource "ovh_cloud_project_loadbalancer" "vpn" {
         name      = "wireguard-nodes"
         protocol  = "udp"
         algorithm = "roundRobin"
-        # Members are attached post-create (OVH rejects bare-metal vRack IPs at create).
+        # Members + health monitor are attached post-create (see null_resource below).
+        # Nesting health_monitor here forces LB replacement on the OVH provider.
         members = []
       }
     }
@@ -99,6 +100,15 @@ resource "null_resource" "ovh_lb_wireguard_members" {
     lb_id   = ovh_cloud_project_loadbalancer.vpn[0].id
     members = jsonencode(local.ovh_lb_members)
     port    = tostring(var.wireguard_node_port)
+    # Bump when health-monitor settings change.
+    health_monitor = jsonencode({
+      name             = "wireguard-udp-connect"
+      monitor_type     = "udp-connect"
+      delay            = 10
+      timeout          = 5
+      max_retries      = 3
+      max_retries_down = 3
+    })
   }
 
   provisioner "local-exec" {
@@ -109,6 +119,7 @@ resource "null_resource" "ovh_lb_wireguard_members" {
       OVH_LB_REGION        = var.ovh_lb_region
       OVH_LB_ID            = ovh_cloud_project_loadbalancer.vpn[0].id
       OVH_LB_MEMBERS_JSON  = jsonencode(local.ovh_lb_members)
+      OVH_LB_HEALTH_JSON   = self.triggers.health_monitor
     }
     command = <<-EOT
       set -euo pipefail
@@ -131,6 +142,7 @@ project = os.environ["OVH_CLOUD_PROJECT_ID"]
 region = os.environ["OVH_LB_REGION"]
 lb = os.environ["OVH_LB_ID"]
 wanted = json.loads(os.environ["OVH_LB_MEMBERS_JSON"])
+hm = json.loads(os.environ["OVH_LB_HEALTH_JSON"])
 
 pool_id = None
 for _ in range(60):
@@ -167,6 +179,29 @@ else:
         True,
     )
 print("wireguard members ok")
+
+monitors = c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor")
+existing_hm = [m for m in monitors if m.get("poolId") == pool_id]
+if existing_hm:
+    print(f"health monitor already present: {existing_hm[0]['id']} ({existing_hm[0]['monitorType']})")
+else:
+    print("creating udp-connect health monitor")
+    created = c.call(
+        "POST",
+        f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor",
+        {
+            "name": hm["name"],
+            "monitorType": hm["monitor_type"],
+            "delay": hm["delay"],
+            "timeout": hm["timeout"],
+            "maxRetries": hm["max_retries"],
+            "maxRetriesDown": hm["max_retries_down"],
+            "poolId": pool_id,
+        },
+        True,
+    )
+    print("health monitor", created.get("id"))
+print("wireguard health monitor ok")
 PY
     EOT
   }

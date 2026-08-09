@@ -57,7 +57,7 @@ backup_s3_bucket    = "maze-cluster-backup-production"
 # keycloak_admin_username = "admin"
 # keycloak_admin_password = "..."
 # bootstrap_admin = {
-#   username = "backnight"
+#   username = "admin"
 #   password = "..."
 #   email    = "admin@maze.trading"  # keep stable for GitLab root SSO link
 # }

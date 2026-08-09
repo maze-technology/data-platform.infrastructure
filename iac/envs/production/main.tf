@@ -1,8 +1,13 @@
 terraform {
   required_version = ">= 1.5.0"
 
-  # Client-side encryption so remote/object storage never sees plaintext state/plan.
-  # After first encrypted write + remote migrate, drop the unencrypted fallback and set enforced=true.
+  # OVH Object Storage (S3). Credentials via AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
+  # (tofu_state user). Partial config — see docs/opentofu-state.md for init flags.
+  backend "s3" {
+    key = "production/terraform.tfstate"
+  }
+
+  # Client-side encryption — remote object storage never sees plaintext state/plan.
   encryption {
     key_provider "pbkdf2" "state" {
       passphrase = var.state_encryption_passphrase
@@ -12,20 +17,14 @@ terraform {
       keys = key_provider.pbkdf2.state
     }
 
-    method "unencrypted" "migrate" {}
-
     state {
-      method = method.aes_gcm.state
-      fallback {
-        method = method.unencrypted.migrate
-      }
+      method   = method.aes_gcm.state
+      enforced = true
     }
 
     plan {
-      method = method.aes_gcm.state
-      fallback {
-        method = method.unencrypted.migrate
-      }
+      method   = method.aes_gcm.state
+      enforced = true
     }
   }
 

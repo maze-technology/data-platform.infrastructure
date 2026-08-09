@@ -4,7 +4,8 @@ terraform {
   # OVH Object Storage (S3). Credentials via AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
   # (tofu_state user). Partial config — see docs/opentofu-state.md for init flags.
   backend "s3" {
-    key = "production/terraform.tfstate"
+    key          = "production/terraform.tfstate"
+    use_lockfile = true # OVH S3 conditional writes (native .tflock)
   }
 
   # Client-side encryption — remote object storage never sees plaintext state/plan.

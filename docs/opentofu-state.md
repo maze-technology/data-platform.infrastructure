@@ -37,7 +37,7 @@ tofu init \
   -backend-config="skip_s3_checksum=true"
 ```
 
-No DynamoDB lock — avoid concurrent applies from two hosts. OVH supports `use_lockfile = true` if you want S3 native locking later.
+Native S3 locking is enabled (`use_lockfile = true`): OpenTofu writes a sibling `.tflock` object via OVH conditional writes. Still avoid overlapping applies from two hosts if a lock is stuck — delete `production/terraform.tfstate.tflock` only after confirming no apply is running.
 
 ## Local backup
 

@@ -122,8 +122,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.30 — GitLab memory + self-hosted Renovate
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.30"
+  # infrastructure-base v0.1.31 — GitLab memory + self-hosted Renovate
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.31"
 
   providers = {
     aws.rgw = aws.rgw

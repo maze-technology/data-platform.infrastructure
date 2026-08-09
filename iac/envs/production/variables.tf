@@ -289,6 +289,19 @@ variable "backup_postgres_dump_schedule_cron" {
   default     = "0 3 * * *"
 }
 
+variable "renovate_enabled" {
+  description = "Deploy self-hosted Renovate CronJob against GitLab"
+  type        = bool
+  default     = true
+}
+
+variable "renovate_github_com_token" {
+  description = "Optional github.com PAT for Renovate changelogs (avoids unauthenticated rate limits)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "backup_postgres_dump_prefix" {
   description = "Prefix under the backup bucket for encrypted logical dumps"
   type        = string

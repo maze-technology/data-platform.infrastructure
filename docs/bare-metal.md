@@ -88,7 +88,7 @@ SSH on the bare-metal nodes is **not** exposed to the public internet.
 
 ## Identity
 
-- **Daily SSO:** `bootstrap_admin` in the Keycloak **maze** realm (production: `backnight`).
+- **Daily SSO:** `bootstrap_admin` in the Keycloak **maze** realm (example: `admin`).
   Same email links GitLab `root` via OIDC. WireGuard peer name defaults to this username.
 - **Keycloak break-glass:** `keycloak_admin_*` in the **master** realm only — offline password
   manager / Vault; not used for GitLab/Grafana/Argo day-to-day.

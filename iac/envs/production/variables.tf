@@ -89,6 +89,12 @@ variable "wireguard_peers" {
   default     = ""
 }
 
+variable "wireguard_allowed_ips" {
+  description = "Comma-separated AllowedIPs for WireGuard peers (VPN + cluster CIDRs + bare-metal private net)"
+  type        = string
+  default     = "10.8.0.0/24,10.96.0.0/12,10.244.0.0/16,192.168.0.0/16"
+}
+
 variable "keycloak_admin_username" {
   description = "Keycloak master realm admin username"
   type        = string

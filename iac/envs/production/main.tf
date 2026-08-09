@@ -122,8 +122,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.28 — logical Postgres dumps + editUsernameAllowed
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.29"
+  # infrastructure-base v0.1.30 — GitLab memory + self-hosted Renovate
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.30"
 
   providers = {
     aws.rgw = aws.rgw
@@ -255,6 +255,10 @@ module "infrastructure_base" {
       password = nonsensitive(var.keycloak_postgresql_password)
     },
   ] : []
+
+  # Self-hosted Renovate for GitLab (CronJob in gitlab ns)
+  renovate_enabled          = var.renovate_enabled
+  renovate_github_com_token = var.renovate_github_com_token
 
   depends_on = [
     ovh_cloud_project_storage.backup,

@@ -1,6 +1,34 @@
 terraform {
   required_version = ">= 1.5.0"
 
+  # Client-side encryption so remote/object storage never sees plaintext state/plan.
+  # After first encrypted write + remote migrate, drop the unencrypted fallback and set enforced=true.
+  encryption {
+    key_provider "pbkdf2" "state" {
+      passphrase = var.state_encryption_passphrase
+    }
+
+    method "aes_gcm" "state" {
+      keys = key_provider.pbkdf2.state
+    }
+
+    method "unencrypted" "migrate" {}
+
+    state {
+      method = method.aes_gcm.state
+      fallback {
+        method = method.unencrypted.migrate
+      }
+    }
+
+    plan {
+      method = method.aes_gcm.state
+      fallback {
+        method = method.unencrypted.migrate
+      }
+    }
+  }
+
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -94,8 +122,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.22 — wireguard_allowed_ips (vRack routes for VPN SSH)
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.22"
+  # infrastructure-base v0.1.23 — logical Postgres dumps + editUsernameAllowed
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.23"
 
   providers = {
     aws.rgw = aws.rgw
@@ -205,6 +233,27 @@ module "infrastructure_base" {
   backup_ttl                         = var.backup_ttl
   backup_object_sync_enabled         = var.backup_object_sync_enabled
   backup_object_sync_schedule_cron   = var.backup_object_sync_schedule_cron
+  backup_postgres_dump_enabled       = var.backup_postgres_dump_enabled
+  backup_postgres_dump_schedule_cron = var.backup_postgres_dump_schedule_cron
+  backup_postgres_dump_prefix        = var.backup_postgres_dump_prefix
+  backup_postgres_dump_targets = var.backup_enabled ? [
+    {
+      name     = "gitlab"
+      host     = "gitlab-postgresql.gitlab.svc.cluster.local"
+      port     = 5432
+      user     = var.gitlab_postgresql_username
+      database = var.gitlab_postgresql_database
+      password = var.gitlab_postgresql_password
+    },
+    {
+      name     = "keycloak"
+      host     = "keycloak-postgresql.keycloak.svc.cluster.local"
+      port     = 5432
+      user     = "bn_keycloak"
+      database = "bitnami_keycloak"
+      password = var.keycloak_postgresql_password
+    },
+  ] : []
 
   depends_on = [
     ovh_cloud_project_storage.backup,

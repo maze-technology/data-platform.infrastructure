@@ -40,7 +40,26 @@ apt-get install -y \
   emacs-nox vim curl wget jq htop iotop traceroute net-tools \
   ca-certificates gnupg lsb-release apt-transport-https \
   chrony software-properties-common unzip \
-  nftables
+  nftables unattended-upgrades apt-listchanges
+
+echo "==> Security unattended-upgrades (no automatic reboot)"
+cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+cat >/etc/apt/apt.conf.d/51maze-unattended <<'EOF'
+Unattended-Upgrade::Allowed-Origins {
+        "${distro_id}:${distro_codename}-security";
+        "${distro_id}ESMApps:${distro_codename}-apps-security";
+        "${distro_id}ESM:${distro_codename}-infra-security";
+};
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+EOF
+systemctl enable --now unattended-upgrades || true
 
 echo "==> Time sync (chrony)"
 systemctl enable --now chrony

@@ -122,8 +122,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.25 — logical Postgres dumps + editUsernameAllowed
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.25"
+  # infrastructure-base v0.1.26 — logical Postgres dumps + editUsernameAllowed
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.26"
 
   providers = {
     aws.rgw = aws.rgw
@@ -243,7 +243,8 @@ module "infrastructure_base" {
       port     = 5432
       user     = var.gitlab_postgresql_username
       database = var.gitlab_postgresql_database
-      password = var.gitlab_postgresql_password
+      # nonsensitive so backup module for_each keys are usable; secret still only in-cluster
+      password = nonsensitive(var.gitlab_postgresql_password)
     },
     {
       name     = "keycloak"
@@ -251,7 +252,7 @@ module "infrastructure_base" {
       port     = 5432
       user     = "bn_keycloak"
       database = "bitnami_keycloak"
-      password = var.keycloak_postgresql_password
+      password = nonsensitive(var.keycloak_postgresql_password)
     },
   ] : []
 

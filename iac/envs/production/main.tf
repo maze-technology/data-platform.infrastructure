@@ -122,8 +122,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.24 — logical Postgres dumps + editUsernameAllowed
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.24"
+  # infrastructure-base v0.1.25 — logical Postgres dumps + editUsernameAllowed
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.25"
 
   providers = {
     aws.rgw = aws.rgw

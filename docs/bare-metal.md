@@ -86,7 +86,24 @@ SSH on the bare-metal nodes is **not** exposed to the public internet.
 - Bootstrap UFW allows SSH from the VPN subnet (`10.8.0.0/24`), pod CIDR (`10.244.0.0/16`
   for WireGuard hairpin), and `JUMP_IP` — never `Anywhere`.
 
+## Identity
+
+- **Daily SSO:** `bootstrap_admin` in the Keycloak **maze** realm (production: `backnight`).
+  Same email links GitLab `root` via OIDC. WireGuard peer name defaults to this username.
+- **Keycloak break-glass:** `keycloak_admin_*` in the **master** realm only — offline password
+  manager / Vault; not used for GitLab/Grafana/Argo day-to-day.
+
+## Host maintenance
+
+- Bootstrap enables **security-only** `unattended-upgrades` with **no automatic reboot**.
+- Reboot nodes one at a time after `kubectl drain` (or later kured). Never reboot all three at once.
+- See also [host-naming.md](host-naming.md) and [opentofu-state.md](opentofu-state.md).
+
 ## External backups
 
-Managed PostgreSQL (and any other resource outside this stack) backups remain
-the responsibility of the person running the infrastructure.
+In-cluster GitLab/Keycloak Postgres is covered by:
+
+1. Velero/Kopia filesystem backups (PVC) → OVH bucket  
+2. Scheduled **logical `pg_dump`** CronJobs → same bucket under `logical/postgres/` (rclone crypt)
+
+Any remaining external/managed databases stay the operator’s responsibility.

@@ -29,8 +29,8 @@ ovh_cloud_project_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # ── PostgreSQL ───────────────────────────────────────────────────────────────
 # Production uses in-cluster Bitnami Postgres for Keycloak and GitLab.
 # Optional overrides (defaults are fine for in-cluster):
-# gitlab_postgresql_username = "gitlab"
-# gitlab_postgresql_database = "gitlabhq_production"
+# gitlab_postgresql_username = "gitlab_prod"
+# gitlab_postgresql_database = "gitlab_production"
 # gitlab_postgresql_password = "..."
 # External PG (unused unless use_external_* is true in main.tf):
 # keycloak_postgresql_host / port / username / database / password
@@ -57,10 +57,12 @@ backup_s3_bucket    = "maze-cluster-backup-production"
 # keycloak_admin_username = "admin"
 # keycloak_admin_password = "..."
 # bootstrap_admin = {
-#   username = "admin"
+#   username = "backnight"
 #   password = "..."
-#   email    = "admin@maze.trading"
+#   email    = "admin@maze.trading"  # keep stable for GitLab root SSO link
 # }
+# keycloak_admin_* = master-realm break-glass (offline), not daily SSO
+
 
 # ── Rook-Ceph storage ────────────────────────────────────────────────────────
 storage_nodes = [

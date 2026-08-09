@@ -4,6 +4,12 @@ variable "cluster_name" {
   default     = "production"
 }
 
+variable "state_encryption_passphrase" {
+  description = "Passphrase for OpenTofu client-side state/plan encryption (TF_VAR_state_encryption_passphrase). Store offline — loss = unrecoverable state."
+  type        = string
+  sensitive   = true
+}
+
 variable "cluster_domain" {
   description = "Base domain for all cluster services (e.g. maze.trading). DNS must resolve auth.<domain>, scm.<domain>, etc. to the cluster LB."
   type        = string
@@ -271,6 +277,24 @@ variable "backup_object_sync_schedule_cron" {
   default     = "30 2 * * *"
 }
 
+variable "backup_postgres_dump_enabled" {
+  description = "Schedule logical pg_dump of GitLab/Keycloak Postgres to OVH backup bucket"
+  type        = bool
+  default     = true
+}
+
+variable "backup_postgres_dump_schedule_cron" {
+  description = "Cron for logical Postgres dumps (UTC)"
+  type        = string
+  default     = "0 3 * * *"
+}
+
+variable "backup_postgres_dump_prefix" {
+  description = "Prefix under the backup bucket for encrypted logical dumps"
+  type        = string
+  default     = "logical/postgres"
+}
+
 # =============================================================================
 # OVH Public Cloud (provider + managed Postgres + Object Storage)
 # =============================================================================
@@ -416,6 +440,12 @@ variable "ovh_object_storage_dr_region" {
   description = "Object Storage region for DR replica bucket (uppercase, e.g. SBG)"
   type        = string
   default     = "SBG"
+}
+
+variable "tofu_state_s3_bucket" {
+  description = "OVH Object Storage bucket name for OpenTofu remote state"
+  type        = string
+  default     = "maze-opentofu-state-production"
 }
 
 variable "backup_s3_dr_bucket" {

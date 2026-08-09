@@ -175,3 +175,67 @@ resource "ovh_cloud_project_storage_replication_job" "backup_catchup" {
 
   depends_on = [ovh_cloud_project_storage.backup]
 }
+
+# -----------------------------------------------------------------------------
+# Object Storage for OpenTofu remote state (client-side encrypted at apply time)
+# -----------------------------------------------------------------------------
+
+resource "ovh_cloud_project_user" "tofu_state" {
+  service_name = local.ovh_project
+  description  = "maze-opentofu-state-s3"
+  role_name    = "objectstore_operator"
+}
+
+resource "ovh_cloud_project_user_s3_credential" "tofu_state" {
+  service_name = ovh_cloud_project_user.tofu_state.service_name
+  user_id      = ovh_cloud_project_user.tofu_state.id
+}
+
+resource "ovh_cloud_project_storage" "tofu_state" {
+  service_name = local.ovh_project
+  region_name  = var.ovh_object_storage_region
+  name         = var.tofu_state_s3_bucket
+
+  versioning = {
+    status = "enabled"
+  }
+
+  encryption = {
+    sse_algorithm = "AES256"
+  }
+
+  tags = {
+    Environment = "production"
+    ManagedBy   = "opentofu"
+    Purpose     = "opentofu-state"
+  }
+}
+
+resource "ovh_cloud_project_user_s3_policy" "tofu_state" {
+  service_name = ovh_cloud_project_user.tofu_state.service_name
+  user_id      = ovh_cloud_project_user.tofu_state.id
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid    = "RWStateBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+          "s3:ListMultipartUploadParts",
+          "s3:ListBucketMultipartUploads",
+          "s3:AbortMultipartUpload",
+          "s3:GetBucketLocation",
+        ]
+        Resource = [
+          "arn:aws:s3:::${ovh_cloud_project_storage.tofu_state.name}",
+          "arn:aws:s3:::${ovh_cloud_project_storage.tofu_state.name}/*",
+        ]
+      }
+    ]
+  })
+
+  depends_on = [ovh_cloud_project_storage.tofu_state]
+}

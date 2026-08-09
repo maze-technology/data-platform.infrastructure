@@ -95,3 +95,25 @@ output "ovh_backup_dr_endpoint" {
   value       = local.backup_s3_dr_endpoint
 }
 
+output "tofu_state_bucket" {
+  description = "OVH Object Storage bucket for OpenTofu remote state"
+  value       = ovh_cloud_project_storage.tofu_state.name
+}
+
+output "tofu_state_s3_endpoint" {
+  description = "S3 endpoint for the OpenTofu state bucket"
+  value       = "https://s3.${lower(var.ovh_object_storage_region)}.io.cloud.ovh.net"
+}
+
+output "tofu_state_access_key" {
+  description = "Access key for OpenTofu state bucket (pair with secret; store offline)"
+  value       = ovh_cloud_project_user_s3_credential.tofu_state.access_key_id
+  sensitive   = true
+}
+
+output "tofu_state_secret_key" {
+  description = "Secret key for OpenTofu state bucket"
+  value       = ovh_cloud_project_user_s3_credential.tofu_state.secret_access_key
+  sensitive   = true
+}
+

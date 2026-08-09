@@ -47,6 +47,12 @@ backup_s3_bucket    = "maze-cluster-backup-production"
 # backup_s3_dr_bucket = "maze-cluster-backup-production-sbg"
 # backup_encryption_password = "..."  # openssl rand -base64 32 — store offline
 
+# ── WireGuard peers ──────────────────────────────────────────────────────────
+# AllowedIPs must include the bare-metal private CIDR so SSH to 192.168.10.x
+# goes through the tunnel (default already includes 192.168.0.0/16).
+# wireguard_allowed_ips = "10.8.0.0/24,10.96.0.0/12,10.244.0.0/16,192.168.0.0/16"
+# wireguard_peers = "admin"
+
 # ── Bootstrap admin (configure BEFORE first deploy) ──────────────────────────
 # keycloak_admin_username = "admin"
 # keycloak_admin_password = "..."

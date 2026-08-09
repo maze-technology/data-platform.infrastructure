@@ -74,6 +74,18 @@ Production is **VPN-only** on the public internet:
 DNS: `vpn.maze.trading` → LB floating IP. App names (`scm`, `auth`, …) need not be
 public; VPN clients resolve them through CoreDNS.
 
+## SSH access
+
+SSH on the bare-metal nodes is **not** exposed to the public internet.
+
+- Preferred: connect to WireGuard, then SSH to private IPs (`192.168.10.1` / `.2` / `.3`).
+  Peer `AllowedIPs` must include the vRack CIDR (`192.168.0.0/16`) so those routes go
+  through the tunnel — regenerate/re-import the peer config after OpenTofu updates it.
+- Break-glass: the management jump host IP (`JUMP_IP`, set automatically when running
+  `01-host-basics.sh --remote`) may still reach port 22. OVH IPMI/KVM remains the last resort.
+- Bootstrap UFW allows SSH from the VPN subnet (`10.8.0.0/24`), pod CIDR (`10.244.0.0/16`
+  for WireGuard hairpin), and `JUMP_IP` — never `Anywhere`.
+
 ## External backups
 
 Managed PostgreSQL (and any other resource outside this stack) backups remain

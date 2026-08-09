@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 01-host-basics.sh — OS prep on a single node (run via run-all or locally with sudo).
-# Usage (on node): sudo ./01-host-basics.sh <hostname> <private_ip> <hosts_block_b64> [vrack_cidr]
+# Usage (on node): sudo ./01-host-basics.sh <hostname> <private_ip> <hosts_block_b64> [vrack_cidr] [vpn_cidr] [pod_cidr]
 # Usage (from laptop): ./01-host-basics.sh --remote
 set -euo pipefail
 
@@ -14,6 +14,8 @@ HOSTNAME_FQDN="${1:?hostname required}"
 PRIVATE_IP="${2:?private ip required}"
 HOSTS_BLOCK="$(printf '%s' "${3:?hosts block b64}" | base64 -d)"
 VRACK_CIDR="${4:-192.168.0.0/16}"
+VPN_CIDR="${5:-10.8.0.0/24}"
+POD_CIDR="${6:-10.244.0.0/16}"
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -69,8 +71,13 @@ apt-get install -y ufw
 ufw --force reset
 ufw default deny incoming
 ufw default allow outgoing
-# SSH
-ufw allow 22/tcp
+# SSH — VPN / cluster pods (WireGuard hairpin) / jump host only. Not public internet.
+# vRack full-trust rule below also covers private-IP SSH between nodes.
+ufw allow from "${VPN_CIDR}" to any port 22 proto tcp comment 'ssh-vpn'
+ufw allow from "${POD_CIDR}" to any port 22 proto tcp comment 'ssh-pods'
+if [[ -n "${JUMP_IP:-}" ]]; then
+  ufw allow from "${JUMP_IP}" to any port 22 proto tcp comment 'ssh-jump'
+fi
 # Kubernetes API — private network always; optional jump host via JUMP_IP env
 ufw allow from "${VRACK_CIDR}" to any port 6443 proto tcp
 if [[ -n "${JUMP_IP:-}" ]]; then
@@ -124,7 +131,7 @@ if [[ "${1:-}" == "--remote" ]]; then
   for i in 0 1 2; do
     echo "======== ${NAMES[$i]} (${HOSTS[$i]}) ========"
     remote "${HOSTS[$i]}" \
-      "sudo JUMP_IP='${JUMP_IP}' bash -s -- ${NAMES[$i]} ${IPS[$i]} ${HOSTS_B64} ${VRACK_CIDR}" \
+      "sudo JUMP_IP='${JUMP_IP}' bash -s -- ${NAMES[$i]} ${IPS[$i]} ${HOSTS_B64} ${VRACK_CIDR} ${VPN_CIDR:-10.8.0.0/24} ${POD_CIDR:-10.244.0.0/16}" \
       <<<"${HOST_BASICS_BODY}"
   done
   echo "✓ Host basics applied on all nodes"
@@ -136,4 +143,4 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-bash -c "${HOST_BASICS_BODY}" -- "${1:?hostname}" "${2:?private_ip}" "${3:?hosts_b64}" "${4:-${VRACK_CIDR}}"
+bash -c "${HOST_BASICS_BODY}" -- "${1:?hostname}" "${2:?private_ip}" "${3:?hosts_b64}" "${4:-${VRACK_CIDR}}" "${5:-${VPN_CIDR:-10.8.0.0/24}}" "${6:-${POD_CIDR:-10.244.0.0/16}}"

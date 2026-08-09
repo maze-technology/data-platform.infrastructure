@@ -94,8 +94,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.21 — WireGuard AppArmor unconfined + DNS-01 / VPN CoreDNS
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.21"
+  # infrastructure-base v0.1.22 — wireguard_allowed_ips (vRack routes for VPN SSH)
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.22"
 
   providers = {
     aws.rgw = aws.rgw
@@ -143,6 +143,7 @@ module "infrastructure_base" {
   vpn_subnet             = var.vpn_subnet
   wireguard_server_url   = var.wireguard_server_url
   wireguard_peers        = var.wireguard_peers
+  wireguard_allowed_ips  = var.wireguard_allowed_ips
   wireguard_service_type = "NodePort"
   wireguard_node_port    = var.wireguard_node_port
 

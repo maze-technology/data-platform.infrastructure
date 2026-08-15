@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "automerge": true,
   "automergeType": "pr",
   "terraform": {
@@ -8,17 +10,29 @@
   },
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions",
-      "reviewers": ["maze-technology/infrastructure-engineers"]
+      "reviewers": [
+        "engineers/infrastructure-engineers"
+      ]
     },
     {
-      "matchManagers": ["terraform"],
-      "matchFileNames": ["iac/**"],
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchFileNames": [
+        "iac/**"
+      ],
       "groupName": "OpenTofu/Terraform",
-      "reviewers": ["maze-technology/infrastructure-engineers"]
+      "reviewers": [
+        "engineers/infrastructure-engineers"
+      ]
     }
   ],
   "dependencyDashboard": true,
-  "configMigration": true
+  "configMigration": true,
+  "reviewersFromCodeOwners": true,
+  "expandCodeOwnersGroups": true
 }

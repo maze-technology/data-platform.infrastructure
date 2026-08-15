@@ -1,3 +1,4 @@
-# Each line is a file pattern followed by one or more owners
+# Each line is a file pattern followed by one or more owners.
+# GitLab groups (SoT): @engineers/infrastructure-engineers
 
-* @maze-technology/infrastructure-engineers
+* @engineers/infrastructure-engineers

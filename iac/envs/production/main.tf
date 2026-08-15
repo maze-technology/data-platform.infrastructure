@@ -123,7 +123,7 @@ provider "aws" {
 
 module "infrastructure_base" {
   # infrastructure-base v0.1.28 — logical Postgres dumps + editUsernameAllowed
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.29"
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.37"
 
   providers = {
     aws.rgw = aws.rgw
@@ -218,6 +218,11 @@ module "infrastructure_base" {
   webservice_min_replicas = 2
   webservice_max_replicas = 4
 
+  # Kellnr private Cargo registry (crates.<domain>)
+  enable_kellnr                   = true
+  kellnr_postgresql_storage_size  = "10Gi"
+  kellnr_replica_count            = 1
+
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled
   backup_s3_bucket                   = local.backup_s3_bucket
@@ -253,6 +258,14 @@ module "infrastructure_base" {
       user     = "bn_keycloak"
       database = "bitnami_keycloak"
       password = nonsensitive(var.keycloak_postgresql_password)
+    },
+    {
+      name     = "kellnr"
+      host     = "kellnr-postgresql.kellnr.svc.cluster.local"
+      port     = 5432
+      user     = "kellnr"
+      database = "kellnr"
+      password = nonsensitive(module.infrastructure_base.kellnr_postgresql_password)
     },
   ] : []
 

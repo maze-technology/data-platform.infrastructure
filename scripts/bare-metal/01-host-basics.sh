@@ -97,10 +97,15 @@ ufw allow from "${POD_CIDR}" to any port 22 proto tcp comment 'ssh-pods'
 if [[ -n "${JUMP_IP:-}" ]]; then
   ufw allow from "${JUMP_IP}" to any port 22 proto tcp comment 'ssh-jump'
 fi
-# Kubernetes API — private network always; optional jump host via JUMP_IP env
-ufw allow from "${VRACK_CIDR}" to any port 6443 proto tcp
+# Kubernetes API — private network always; optional jump host via JUMP_IP env.
+# Also allow pod CIDR: kube-proxy DNAT of ClusterIP kubernetes to the *local*
+# node IP keeps the pod source address, so UFW INPUT sees 10.244.0.0/16 → :6443.
+# Without this, ~1/N API calls from in-cluster clients (e.g. GitLab runner exec/
+# cleanup) time out when LB picks the local apiserver endpoint.
+ufw allow from "${VRACK_CIDR}" to any port 6443 proto tcp comment 'apiserver-vrack'
+ufw allow from "${POD_CIDR}" to any port 6443 proto tcp comment 'apiserver-pods'
 if [[ -n "${JUMP_IP:-}" ]]; then
-  ufw allow from "${JUMP_IP}" to any port 6443 proto tcp
+  ufw allow from "${JUMP_IP}" to any port 6443 proto tcp comment 'apiserver-jump'
 fi
 # etcd / kubelet / control-plane ports — private only
 ufw allow from "${VRACK_CIDR}" to any port 2379:2380 proto tcp

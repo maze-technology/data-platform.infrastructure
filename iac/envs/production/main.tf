@@ -111,6 +111,10 @@ provider "aws" {
     s3 = local.rgw_s3_apply_endpoint
   }
 
+  # Explicit RGW keys — AWS_* env is reserved for OVH OpenTofu state backend.
+  access_key = var.rgw_s3_access_key
+  secret_key = var.rgw_s3_secret_key
+
   region                      = "us-east-1"
   s3_use_path_style           = true
   skip_credentials_validation = true

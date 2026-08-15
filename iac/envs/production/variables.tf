@@ -71,6 +71,20 @@ variable "rgw_s3_endpoint" {
   default     = ""
 }
 
+variable "rgw_s3_access_key" {
+  description = "Rook RGW S3 access key for aws.rgw (do not reuse AWS_* — those are OVH state-backend keys)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "rgw_s3_secret_key" {
+  description = "Rook RGW S3 secret key for aws.rgw"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "vpn_subnet" {
   description = "WireGuard VPN subnet CIDR — used for ingress whitelisting"
   type        = string

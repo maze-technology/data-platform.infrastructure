@@ -194,15 +194,15 @@ variable "gitlab_postgresql_port" {
 }
 
 variable "gitlab_postgresql_username" {
-  description = "GitLab PostgreSQL username"
+  description = "GitLab PostgreSQL username (must match Bitnami PVC init; production uses gitlab_prod)"
   type        = string
-  default     = "gitlab"
+  default     = "gitlab_prod"
 }
 
 variable "gitlab_postgresql_database" {
-  description = "GitLab PostgreSQL database name"
+  description = "GitLab PostgreSQL database name (must match Bitnami PVC init; production uses gitlab_production)"
   type        = string
-  default     = "gitlabhq_production"
+  default     = "gitlab_production"
 }
 
 variable "gitlab_postgresql_password" {

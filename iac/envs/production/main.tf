@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.39 — VPN split-DNS, OVH DNS-01 auth, Kellnr TLS
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.39"
+  # infrastructure-base v0.1.40 — Grafana OIDC root_url, Renovate develop baseBranches, registry S3 fix
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.40"
 
   providers = {
     aws.rgw = aws.rgw

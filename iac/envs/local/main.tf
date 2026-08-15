@@ -133,7 +133,7 @@ resource "aws_s3_bucket_versioning" "cluster_backup" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.2"
+  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.37"
 
   providers = {
     aws.rgw = aws.rgw
@@ -241,6 +241,11 @@ module "infrastructure_base" {
   gitaly_storage_class           = "standard"
   gitaly_storage_size            = "4Gi"
   gitlab_postgresql_storage_size = "3Gi"
+
+  # Kellnr private Cargo registry
+  enable_kellnr                  = true
+  kellnr_postgresql_storage_size = "3Gi"
+  kellnr_replica_count           = 1
   valkey_storage_size            = "1Gi"
   s3_force_destroy               = true
   install_gitlab_runner          = true

@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.38 — Kellnr Cargo registry (+ prior GitLab/Maven fixes)
-  source = "git::https://github.com/maze-technology/infrastructure-base.git?ref=v0.1.38"
+  # infrastructure-base v0.1.39 — VPN split-DNS, OVH DNS-01 auth, Kellnr TLS
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.39"
 
   providers = {
     aws.rgw = aws.rgw
@@ -162,7 +162,8 @@ module "infrastructure_base" {
   acme_solver                = "dns01"
   ovh_dns_application_key    = var.ovh_application_key
   ovh_dns_application_secret = var.ovh_application_secret
-  ovh_dns_consumer_key       = var.ovh_consumer_key
+  # Domain-scoped CK (maze.trading); never the cloud-project consumer key.
+  ovh_dns_consumer_key       = var.ovh_dns_consumer_key != "" ? var.ovh_dns_consumer_key : var.ovh_consumer_key
   ovh_dns_endpoint_name      = var.ovh_endpoint != "" ? var.ovh_endpoint : "ovh-eu"
   ovh_dns_webhook_group_name = "acme.${var.cluster_domain}"
 

@@ -334,7 +334,14 @@ variable "ovh_application_secret" {
 }
 
 variable "ovh_consumer_key" {
-  description = "OVH API consumer key (or OVH_CONSUMER_KEY env)"
+  description = "OVH API consumer key for cloud/OpenTofu (or OVH_CONSUMER_KEY env). Cloud-project scoped — do not reuse for DNS-01."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_dns_consumer_key" {
+  description = "OVH consumer key for cert-manager DNS-01. Must allow /domain/zone/<cluster_domain> only (not the cloud CK)."
   type        = string
   sensitive   = true
   default     = ""

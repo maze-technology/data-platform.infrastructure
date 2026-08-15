@@ -67,12 +67,17 @@ Production is **VPN-only** on the public internet:
 
 - OVH Public Cloud LB (managed in OpenTofu `ovh_lb.tf`) exposes **UDP 31820** only
   (WireGuard NodePort) to the three bare-metal private IPs.
-- Ingress-nginx is **ClusterIP**; app hostnames resolve via WireGuard DNS → CoreDNS →
-  that ClusterIP. There is no public HTTP/HTTPS listener.
+- Ingress-nginx is **ClusterIP**; app hostnames resolve via WireGuard **split-DNS**
+  (systemd-resolved `~maze.trading` → CoreDNS) → that ClusterIP. There is no public
+  HTTP/HTTPS listener. Peer configs must **not** set `DNS=` (that triggers
+  `resolvconf -x` and breaks general internet); they use `resolvectl` PostUp hooks.
 - TLS is Let's Encrypt **DNS-01** (OVH DNS webhook) — no ACME HTTP-01 on :80.
+  Use a dedicated OVH consumer key limited to `/domain/zone/<domain>/*`, not the
+  cloud-project OpenTofu key (`ovh_dns_consumer_key` in production tfvars).
 
-DNS: `vpn.maze.trading` → LB floating IP. App names (`scm`, `auth`, …) need not be
-public; VPN clients resolve them through CoreDNS.
+DNS: `vpn.maze.trading` → LB floating IP via **public** DNS only (CoreDNS must not
+override it to the ingress ClusterIP — that breaks the WireGuard endpoint after
+connect). App names (`scm`, `auth`, `crates`, …) resolve through CoreDNS while on VPN.
 
 ## SSH access
 

@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.45 — webservice/runner memory; SDKMAN CI restored
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.45"
+  # infrastructure-base v0.1.48 — GitLab Release notes; release-approval CE gate
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.48"
 
   providers = {
     aws.rgw = aws.rgw

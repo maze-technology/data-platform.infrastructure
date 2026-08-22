@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.52 — Kellnr sync nested Keycloak group lookup
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.52"
+  # infrastructure-base v0.1.53 — Keycloak providers mount + webhook events for Kellnr sync
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.53"
 
   providers = {
     aws.rgw = aws.rgw

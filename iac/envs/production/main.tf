@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.51 — GitLab 19.1.6, Kellnr↔Keycloak sync, Keycloak events JAR fix
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.51"
+  # infrastructure-base v0.1.52 — Kellnr sync nested Keycloak group lookup
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.52"
 
   providers = {
     aws.rgw = aws.rgw

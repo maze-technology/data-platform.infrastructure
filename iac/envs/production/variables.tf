@@ -413,7 +413,9 @@ variable "ovh_lb_id" {
 }
 
 variable "ovh_lb_backend_nodes" {
-  description = "Bare-metal private IPs behind the WireGuard UDP listener"
+  # WireGuard runs as a DaemonSet (one pod per node) with identical keys.
+  # OVH pool algorithm must be sourceIP so each client IP sticks to one node.
+  description = "Bare-metal private IPs behind the WireGuard UDP listener (all WG DaemonSet nodes)"
   type = list(object({
     name       = string
     private_ip = string

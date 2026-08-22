@@ -112,9 +112,38 @@ ufw allow from "${VRACK_CIDR}" to any port 2379:2380 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10250 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10257 proto tcp
 ufw allow from "${VRACK_CIDR}" to any port 10259 proto tcp
-# NodePort range — TCP kept for optional diagnostics; WireGuard needs UDP.
+# NodePort range — TCP kept for optional diagnostics.
 ufw allow 30000:32767/tcp
-ufw allow 31820/udp comment 'wireguard'
+# WireGuard NodePort: never allow UDP 31820 from the public internet.
+# Clients use the OVH LB floating IP (vpn.maze.trading). LB reaches nodes via vRack.
+ufw allow from "${VRACK_CIDR}" to any port 31820 proto udp comment 'wireguard-via-lb-vrack'
+# Drop NodePort hits on the public address before Cilium/kube-proxy (UFW alone is not enough).
+PUBLIC_IP="$(ip -4 -o addr show scope global | awk '!/192\.168\.|10\.244\.|10\.8\.|10\.96\./ {print $4}' | head -1 | cut -d/ -f1 || true)"
+if [[ -n "${PUBLIC_IP}" ]]; then
+  install -m 0755 /dev/stdin /usr/local/sbin/maze-block-wg-public.sh <<SCRIPT
+#!/bin/bash
+set -euo pipefail
+PUBLIC_IP="${PUBLIC_IP}"
+iptables -t raw -C PREROUTING -d "\${PUBLIC_IP}/32" -p udp --dport 31820 -j DROP 2>/dev/null \\
+  || iptables -t raw -I PREROUTING 1 -d "\${PUBLIC_IP}/32" -p udp --dport 31820 -j DROP
+SCRIPT
+  cat >/etc/systemd/system/maze-block-wg-public.service <<'UNIT'
+[Unit]
+Description=Block WireGuard NodePort on public IP (LB/vRack only)
+After=network-online.target ufw.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/maze-block-wg-public.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+  systemctl daemon-reload
+  systemctl enable --now maze-block-wg-public.service
+fi
 # HTTP/HTTPS not exposed publicly (VPN-only + DNS-01). Still allow from vRack for node health.
 # Cilium / VXLAN / health (adjust if CNI changes)
 ufw allow 8472/udp

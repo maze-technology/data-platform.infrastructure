@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.54 — Keycloak NO_DELETE for maze algorithm subgroups
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.54"
+  # infrastructure-base v0.1.56 — WireGuard DaemonSet HA + Local traffic policy
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.56"
 
   providers = {
     aws.rgw = aws.rgw

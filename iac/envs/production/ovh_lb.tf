@@ -82,9 +82,10 @@ resource "ovh_cloud_project_loadbalancer" "vpn" {
       pool = {
         name      = "wireguard-nodes"
         protocol  = "udp"
-        algorithm = "roundRobin"
+        algorithm = "sourceIP"
         # Members + health monitor are attached post-create (see null_resource below).
         # Nesting health_monitor here forces LB replacement on the OVH provider.
+        # sourceIP keeps each client on one node (required for WireGuard DaemonSet HA).
         members = []
       }
     }
@@ -145,23 +146,49 @@ wanted = json.loads(os.environ["OVH_LB_MEMBERS_JSON"])
 hm = json.loads(os.environ["OVH_LB_HEALTH_JSON"])
 
 pool_id = None
+pool_algo = None
 for _ in range(60):
     pools = c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/pool")
-    for p in pools:
-        if p.get("loadbalancerId") == lb and p.get("name") == "wireguard-nodes":
-            pool_id = p["id"]
-            break
-    if pool_id:
+    # Prefer the pool attached to a listener (active HA pool).
+    candidates = [p for p in pools if p.get("loadbalancerId") == lb and p.get("name") == "wireguard-nodes"]
+    attached = [p for p in candidates if p.get("listenerId")]
+    chosen = (attached or candidates)
+    if chosen:
+        # Prefer sourceIP when multiple linger after a migrate.
+        chosen.sort(key=lambda p: 0 if p.get("algorithm") == "sourceIP" else 1)
+        pool_id = chosen[0]["id"]
+        pool_algo = chosen[0].get("algorithm")
         break
     time.sleep(5)
 if not pool_id:
     raise SystemExit("wireguard-nodes pool not found")
+if pool_algo != "sourceIP":
+    raise SystemExit(f"wireguard-nodes pool algorithm is {pool_algo!r}, expected sourceIP (DaemonSet HA)")
+print(f"using pool {pool_id} algorithm={pool_algo}")
 
+wanted_addrs = {m["address"] for m in wanted}
 existing = c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/pool/{pool_id}/member")
 have = {m["address"] for m in existing}
 to_add = [m for m in wanted if m["address"] not in have]
+to_remove = [m for m in existing if m["address"] not in wanted_addrs]
+
+# Pool members are immutable while a health monitor is attached.
+monitors = [m for m in c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor") if m.get("poolId") == pool_id]
+detached_hm = False
+if to_remove and monitors:
+    for mon in monitors:
+        print(f"detaching health monitor {mon['id']} to mutate members")
+        c.delete(f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor/{mon['id']}")
+    detached_hm = True
+    time.sleep(5)
+    monitors = []
+
+for m in to_remove:
+    print(f"removing member {m.get('name')} {m['address']}")
+    c.delete(f"/cloud/project/{project}/region/{region}/loadbalancing/pool/{pool_id}/member/{m['id']}")
+
 if not to_add:
-    print("all members already present")
+    print("all wanted members already present")
 else:
     print(f"adding {len(to_add)} members")
     c.call(
@@ -180,10 +207,9 @@ else:
     )
 print("wireguard members ok")
 
-monitors = c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor")
-existing_hm = [m for m in monitors if m.get("poolId") == pool_id]
-if existing_hm:
-    print(f"health monitor already present: {existing_hm[0]['id']} ({existing_hm[0]['monitorType']})")
+monitors = [m for m in c.get(f"/cloud/project/{project}/region/{region}/loadbalancing/healthMonitor") if m.get("poolId") == pool_id]
+if monitors:
+    print(f"health monitor already present: {monitors[0]['id']} ({monitors[0]['monitorType']})")
 else:
     print("creating udp-connect health monitor")
     created = c.call(

@@ -11,12 +11,16 @@ ORIGINAL_BRANCH=$(git symbolic-ref --short HEAD)
 # Get repo info from git remote
 REPO_URL=$(git config --get remote.origin.url)
 
-# Extract owner/repo from HTTPS or SSH format
-if [[ "$REPO_URL" =~ github\.com[:/](.+/.+?)(\.git)?$ ]]; then
+# Extract owner/repo from HTTPS or SSH format (GitLab/scm or legacy GitHub)
+if [[ "$REPO_URL" =~ scm\.maze\.trading[:/](.+/.+?)(\.git)?$ ]]; then
+  REPO="${BASH_REMATCH[1]}"
+elif [[ "$REPO_URL" =~ github\.com[:/](.+/.+?)(\.git)?$ ]]; then
+  REPO="${BASH_REMATCH[1]}"
+elif [[ "$REPO_URL" =~ [/:]((data-platform|templates|configuration|algorithms)/[^/.]+)(\.git)?$ ]]; then
   REPO="${BASH_REMATCH[1]}"
 else
-  echo "❌ Unable to parse repository from remote URL: $REPO_URL"
-  exit 1
+  REPO="$(basename "$REPO_URL" .git)"
+  echo "⚠️  Could not parse owner/repo from remote URL: $REPO_URL (continuing as $REPO)"
 fi
 
 echo "📦 Repository: $REPO"

@@ -19,10 +19,9 @@ stages:
   - validate
 
 include:
-  # Prefer develop until the next infrastructure-base tag ships the template.
   - project: "data-platform/infrastructure-base"
-    ref: "develop"
+    ref: "v0.1.57"
     file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
   - project: "data-platform/infrastructure-base"
-    ref: "develop"
+    ref: "v0.1.57"
     file: "/ci/templates/release-approval.gitlab-ci.yml"

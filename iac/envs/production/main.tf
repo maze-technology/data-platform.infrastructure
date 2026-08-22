@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.56 — WireGuard DaemonSet HA + Local traffic policy
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.56"
+  # infrastructure-base v0.1.57 — WG HA, fmt CI templates, Sidekiq 2Gi
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.57"
 
   providers = {
     aws.rgw = aws.rgw

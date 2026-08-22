@@ -1,0 +1,28 @@
+# OpenTofu CI for infrastructure (GitLab SoT).
+# Ports useful GitHub workflows:
+#   - opentofu-fmt-check.yaml → shared opentofu-fmt template
+#   - release-approval.yaml  → manual gate on MRs targeting main
+#
+# Composition roots only: fmt is enough for validate. Apply stays local/tofu CLI.
+# Tagging main is done via ./release.sh (FF develop→main), not auto-tag.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+
+stages:
+  - validate
+
+include:
+  # Prefer develop until the next infrastructure-base tag ships the template.
+  - project: "data-platform/infrastructure-base"
+    ref: "develop"
+    file: "/ci/templates/opentofu-fmt.gitlab-ci.yml"
+  - project: "data-platform/infrastructure-base"
+    ref: "develop"
+    file: "/ci/templates/release-approval.gitlab-ci.yml"

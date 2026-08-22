@@ -22,7 +22,7 @@ include:
   # Prefer develop until the next infrastructure-base tag ships the template.
   - project: "data-platform/infrastructure-base"
     ref: "develop"
-    file: "/ci/templates/opentofu-fmt.gitlab-ci.yml"
+    file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
   - project: "data-platform/infrastructure-base"
     ref: "develop"
     file: "/ci/templates/release-approval.gitlab-ci.yml"

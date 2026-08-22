@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.48 — GitLab Release notes; release-approval CE gate
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.48"
+  # infrastructure-base v0.1.50 — GitLab 19.1.6, Kellnr↔Keycloak sync, OIDC algorithm groups
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.50"
 
   providers = {
     aws.rgw = aws.rgw
@@ -224,9 +224,12 @@ module "infrastructure_base" {
   webservice_max_replicas = 4
 
   # Kellnr private Cargo registry (crates.<domain>)
-  enable_kellnr                   = true
-  kellnr_postgresql_storage_size  = "10Gi"
-  kellnr_replica_count            = 1
+  enable_kellnr                     = true
+  kellnr_postgresql_storage_size    = "10Gi"
+  kellnr_replica_count              = 1
+  enable_kellnr_keycloak_sync       = true
+  kellnr_keycloak_sync_groups       = var.kellnr_keycloak_sync_groups
+  gitlab_oidc_extra_required_groups = var.gitlab_oidc_extra_required_groups
 
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled

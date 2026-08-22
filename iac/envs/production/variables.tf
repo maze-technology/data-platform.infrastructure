@@ -149,6 +149,18 @@ variable "bootstrap_users" {
   default   = []
 }
 
+variable "kellnr_keycloak_sync_groups" {
+  description = "Keycloak/Kellnr group names kept in sync by the event listener"
+  type        = list(string)
+  default     = []
+}
+
+variable "gitlab_oidc_extra_required_groups" {
+  description = "Extra Keycloak groups allowed to sign in to GitLab (algorithm subgroups under engineers)"
+  type        = list(string)
+  default     = []
+}
+
 # Optional external-PG overrides (unused when apps use in-cluster Bitnami Postgres).
 variable "keycloak_postgresql_host" {
   description = "External Keycloak PostgreSQL host (empty = in-cluster)"

@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.60 — WireGuard patch sed fix, keycloak-events 0.49 pin
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.60"
+  # infrastructure-base v0.1.61 — git-ssh CoreDNS, Keycloak 26.3.3
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.61"
 
   providers = {
     aws.rgw = aws.rgw

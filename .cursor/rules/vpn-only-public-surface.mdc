@@ -1,0 +1,25 @@
+---
+description: Public attack surface is WireGuard VPN only — never expose app/Git SSH publicly
+alwaysApply: true
+---
+
+# VPN-only public surface
+
+The **only** service intentionally reachable from the public internet is **WireGuard UDP** (`vpn.<domain>` → OVH LB → NodePort). Everything else (HTTPS apps, GitLab UI, git SSH, registry, APIs) is **VPN-internal**.
+
+## Do
+
+- Keep OVH LB listeners limited to WireGuard UDP
+- Reach `scm`, `auth`, `git-ssh`, registry, etc. via WireGuard + CoreDNS split-DNS (`~maze.trading`)
+- Use `HostName git-ssh.<domain>` for Git over SSH (CoreDNS → `gitlab-gitlab-shell` ClusterIP)
+
+## Do not
+
+- Add public TCP/HTTP/HTTPS listeners for GitLab, ingress, or git SSH
+- Publish NodePort/LoadBalancer Services for app traffic
+- “Fix” git access by exposing `scm.<domain>:22` or gitlab-shell on the internet
+- Point public DNS for app hostnames at the LB floating IP (except `vpn.<domain>`)
+
+## Why
+
+Minimum attack surface: unauthenticated internet can only attempt WireGuard handshake; all SCM and control-plane access requires a provisioned VPN peer.

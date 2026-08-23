@@ -63,7 +63,7 @@ Control-plane taints are removed so all three nodes schedule workloads.
 
 ## Ingress / Load Balancer
 
-Production is **VPN-only** on the public internet:
+Production is **VPN-only** on the public internet (see [public-surface.md](public-surface.md)):
 
 - OVH Public Cloud LB (managed in OpenTofu `ovh_lb.tf`) exposes **UDP 31820** only
   (WireGuard NodePort) to the three bare-metal private IPs.
@@ -71,13 +71,15 @@ Production is **VPN-only** on the public internet:
   (systemd-resolved `~maze.trading` → CoreDNS) → that ClusterIP. There is no public
   HTTP/HTTPS listener. Peer configs must **not** set `DNS=` (that triggers
   `resolvconf -x` and breaks general internet); they use `resolvectl` PostUp hooks.
+- Git over SSH uses CoreDNS name **`git-ssh.maze.trading`** → `gitlab-gitlab-shell`
+  ClusterIP (never the public LB). Example SSH config: `HostName git-ssh.maze.trading`.
 - TLS is Let's Encrypt **DNS-01** (OVH DNS webhook) — no ACME HTTP-01 on :80.
   Use a dedicated OVH consumer key limited to `/domain/zone/<domain>/*`, not the
   cloud-project OpenTofu key (`ovh_dns_consumer_key` in production tfvars).
 
 DNS: `vpn.maze.trading` → LB floating IP via **public** DNS only (CoreDNS must not
 override it to the ingress ClusterIP — that breaks the WireGuard endpoint after
-connect). App names (`scm`, `auth`, `crates`, …) resolve through CoreDNS while on VPN.
+connect). App names (`scm`, `auth`, `crates`, `git-ssh`, …) resolve through CoreDNS while on VPN.
 
 ## SSH access
 

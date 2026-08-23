@@ -51,15 +51,15 @@ backup_s3_bucket    = "maze-cluster-backup-production"
 # AllowedIPs must include the bare-metal private CIDR so SSH to 192.168.10.x
 # goes through the tunnel (default already includes 192.168.0.0/16).
 # wireguard_allowed_ips = "10.8.0.0/24,10.96.0.0/12,10.244.0.0/16,192.168.0.0/16"
-# wireguard_peers = "admin"
+# wireguard_peers = "b4ck"
 
 # ── Bootstrap admin (configure BEFORE first deploy) ──────────────────────────
-# keycloak_admin_username = "admin"
+# keycloak_admin_username = "b4ck_master"
 # keycloak_admin_password = "..."
 # bootstrap_admin = {
-#   username = "admin"
+#   username = "b4ck"
 #   password = "..."
-#   email    = "admin@maze.trading"  # keep stable for GitLab root SSO link
+#   email    = "admin@maze.trading"  # keep stable for GitLab SSO link
 # }
 # keycloak_admin_* = master-realm break-glass (offline), not daily SSO
 

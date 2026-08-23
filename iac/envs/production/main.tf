@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.61 — git-ssh CoreDNS, Keycloak 26.3.3
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.61"
+  # infrastructure-base v0.1.62 — git-ssh CoreDNS, Keycloak 26.3.3
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.62"
 
   providers = {
     aws.rgw = aws.rgw

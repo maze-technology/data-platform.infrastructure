@@ -126,8 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.62 — git-ssh CoreDNS, Keycloak 26.3.3
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.62"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.2"
 
   providers = {
     aws.rgw = aws.rgw
@@ -252,7 +251,7 @@ module "infrastructure_base" {
   backup_postgres_dump_targets = var.backup_enabled ? [
     {
       name     = "gitlab"
-      host     = "gitlab-postgresql.gitlab.svc.cluster.local"
+      host     = "gitlab-pg-rw.gitlab.svc.cluster.local"
       port     = 5432
       user     = var.gitlab_postgresql_username
       database = var.gitlab_postgresql_database
@@ -261,15 +260,15 @@ module "infrastructure_base" {
     },
     {
       name     = "keycloak"
-      host     = "keycloak-postgresql.keycloak.svc.cluster.local"
+      host     = "keycloak-pg-rw.keycloak.svc.cluster.local"
       port     = 5432
-      user     = "bn_keycloak"
-      database = "bitnami_keycloak"
-      password = nonsensitive(var.keycloak_postgresql_password)
+      user     = var.keycloak_postgresql_username
+      database = var.keycloak_postgresql_database
+      password = nonsensitive(module.infrastructure_base.keycloak_postgresql_password)
     },
     {
       name     = "kellnr"
-      host     = "kellnr-postgresql.kellnr.svc.cluster.local"
+      host     = "kellnr-pg-rw.kellnr.svc.cluster.local"
       port     = 5432
       user     = "kellnr"
       database = "kellnr"

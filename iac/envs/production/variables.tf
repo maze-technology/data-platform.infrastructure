@@ -161,7 +161,7 @@ variable "gitlab_oidc_extra_required_groups" {
   default     = []
 }
 
-# Optional external-PG overrides (unused when apps use in-cluster Bitnami Postgres).
+# Optional external-PG overrides (unused when apps use in-cluster CloudNativePG).
 variable "keycloak_postgresql_host" {
   description = "External Keycloak PostgreSQL host (empty = in-cluster)"
   type        = string
@@ -206,13 +206,13 @@ variable "gitlab_postgresql_port" {
 }
 
 variable "gitlab_postgresql_username" {
-  description = "GitLab PostgreSQL username (must match Bitnami PVC init; production uses gitlab_prod)"
+  description = "GitLab PostgreSQL username (production uses gitlab_prod)"
   type        = string
   default     = "gitlab_prod"
 }
 
 variable "gitlab_postgresql_database" {
-  description = "GitLab PostgreSQL database name (must match Bitnami PVC init; production uses gitlab_production)"
+  description = "GitLab PostgreSQL database name (production uses gitlab_production)"
   type        = string
   default     = "gitlab_production"
 }

@@ -30,6 +30,20 @@ Expected shape: three nodes with private NICs on a shared VLAN/CIDR (see
 - Private networking already configured on each node
 - Ubuntu 26.04 (or compatible) on all nodes
 
+## UFW: pod → apiserver
+
+`01-host-basics.sh` opens TCP **6443** from the pod CIDR (`10.244.0.0/16`, comment
+`apiserver-pods`). Without that rule, ClusterIP DNAT keeps the pod source IP and UFW
+drops kube-apiserver traffic — GitLab Runner jobs then fail with
+`dial tcp …6443: i/o timeout`.
+
+On nodes bootstrapped before that rule existed:
+
+```bash
+ufw allow from 10.244.0.0/16 to any port 6443 proto tcp comment 'apiserver-pods'
+ufw reload
+```
+
 ## Run order (from this repo)
 
 ```bash

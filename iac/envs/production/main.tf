@@ -185,8 +185,7 @@ module "infrastructure_base" {
   bootstrap_admin         = var.bootstrap_admin
   bootstrap_users         = var.bootstrap_users
   keycloak_replica_count  = 2
-  # In-cluster Bitnami Postgres (Web Cloud dropped — GitLab already needs schemas;
-  # keep one PG pattern for both apps).
+  # In-cluster CloudNativePG (shared pattern with GitLab / Kellnr).
   use_external_keycloak_database   = false
   keycloak_postgresql_storage_size = "20Gi"
 

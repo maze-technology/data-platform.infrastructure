@@ -27,7 +27,7 @@ ovh_cloud_project_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # ovh_lb_gateway_id     = "..."
 
 # ── PostgreSQL ───────────────────────────────────────────────────────────────
-# Production uses in-cluster Bitnami Postgres for Keycloak and GitLab.
+# Production uses in-cluster CloudNativePG for Keycloak, GitLab, and Kellnr.
 # Optional overrides (defaults are fine for in-cluster):
 # gitlab_postgresql_username = "gitlab_prod"
 # gitlab_postgresql_database = "gitlab_production"

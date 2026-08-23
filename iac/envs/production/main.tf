@@ -126,8 +126,8 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  # infrastructure-base v0.1.58 — runner concurrent=3, Renovate concurrency=2
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.59"
+  # infrastructure-base v0.1.60 — WireGuard patch sed fix, keycloak-events 0.49 pin
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.1.60"
 
   providers = {
     aws.rgw = aws.rgw

@@ -20,8 +20,8 @@ stages:
 
 include:
   - project: "data-platform/infrastructure-base"
-    ref: "v0.1.62"
+    ref: "v0.2.3"
     file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
   - project: "data-platform/infrastructure-base"
-    ref: "v0.1.62"
+    ref: "v0.2.3"
     file: "/ci/templates/release-approval.gitlab-ci.yml"

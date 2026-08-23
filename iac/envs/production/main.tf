@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.5"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.6"
 
   providers = {
     aws.rgw = aws.rgw
@@ -254,8 +254,9 @@ module "infrastructure_base" {
       port     = 5432
       user     = var.gitlab_postgresql_username
       database = var.gitlab_postgresql_database
-      # nonsensitive so backup module for_each keys are usable; secret still only in-cluster
-      password = nonsensitive(var.gitlab_postgresql_password)
+      # Use module output (covers generated random_password when tfvars leave it empty).
+      # nonsensitive so backup module for_each keys are usable; secret still only in-cluster.
+      password = nonsensitive(module.infrastructure_base.gitlab_postgresql_password)
     },
     {
       name     = "keycloak"

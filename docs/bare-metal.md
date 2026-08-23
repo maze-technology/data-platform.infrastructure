@@ -122,9 +122,13 @@ SSH on the bare-metal nodes is **not** exposed to the public internet.
 
 ## External backups
 
-In-cluster GitLab/Keycloak Postgres is covered by:
+In-cluster **GitLab / Keycloak / Kellnr** CloudNativePG is covered by:
 
-1. Velero/Kopia filesystem backups (PVC) → OVH bucket  
-2. Scheduled **logical `pg_dump`** CronJobs → same bucket under `logical/postgres/` (rclone crypt)
+1. Velero/Kopia filesystem backups (PVC, including `*-pg-1`) → OVH bucket  
+2. Scheduled **logical `pg_dump`** CronJobs (`postgres-dump-{gitlab,keycloak,kellnr}`) → same bucket under `logical/postgres/` (rclone crypt). Dump client image must be ≥ CNPG major (currently Postgres 18).
+
+There is no CNPG continuous WAL archiving (`ScheduledBackup`) yet — recovery is dump +/or PVC restore.
+
+GitLab Valkey is cache-only (safe to empty on restore). Gitaly + RGW object mirror cover repos/blobs separately.
 
 Any remaining external/managed databases stay the operator’s responsibility.

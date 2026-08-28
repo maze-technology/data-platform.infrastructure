@@ -59,7 +59,7 @@ backup_s3_bucket    = "maze-cluster-backup-production"
 # bootstrap_admin = {
 #   username = "b4ck"
 #   password = "..."
-#   email    = "b4ck@maze.trading"
+#   email    = "admin@example.com"
 # }
 # keycloak_admin_* = master-realm break-glass (offline), not daily SSO
 

@@ -161,6 +161,12 @@ variable "gitlab_oidc_extra_required_groups" {
   default     = []
 }
 
+variable "coder_oidc_allowed_groups" {
+  description = "Keycloak groups allowed to sign in to Coder"
+  type        = list(string)
+  default     = ["engineers", "admins"]
+}
+
 # Optional external-PG overrides (unused when apps use in-cluster CloudNativePG).
 variable "keycloak_postgresql_host" {
   description = "External Keycloak PostgreSQL host (empty = in-cluster)"

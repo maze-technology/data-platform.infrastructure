@@ -230,9 +230,9 @@ module "infrastructure_base" {
   gitlab_oidc_extra_required_groups = var.gitlab_oidc_extra_required_groups
 
   # Coder — in-cluster dev workspaces (SSH via coder config-ssh, Cursor via Coder Remote)
-  enable_coder                     = true
-  coder_postgresql_storage_size    = "10Gi"
-  coder_oidc_allowed_groups        = var.coder_oidc_allowed_groups
+  enable_coder                  = true
+  coder_postgresql_storage_size = "10Gi"
+  coder_oidc_allowed_groups     = var.coder_oidc_allowed_groups
 
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled

@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.8"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.9"
 
   providers = {
     aws.rgw = aws.rgw
@@ -229,6 +229,11 @@ module "infrastructure_base" {
   kellnr_keycloak_sync_groups       = var.kellnr_keycloak_sync_groups
   gitlab_oidc_extra_required_groups = var.gitlab_oidc_extra_required_groups
 
+  # Coder — in-cluster dev workspaces (SSH via coder config-ssh, Cursor via Coder Remote)
+  enable_coder                  = true
+  coder_postgresql_storage_size = "10Gi"
+  coder_oidc_allowed_groups     = var.coder_oidc_allowed_groups
+
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled
   backup_s3_bucket                   = local.backup_s3_bucket
@@ -273,6 +278,14 @@ module "infrastructure_base" {
       user     = "kellnr"
       database = "kellnr"
       password = nonsensitive(module.infrastructure_base.kellnr_postgresql_password)
+    },
+    {
+      name     = "coder"
+      host     = "coder-pg-rw.coder.svc.cluster.local"
+      port     = 5432
+      user     = "coder"
+      database = "coder"
+      password = nonsensitive(module.infrastructure_base.coder_postgresql_password)
     },
   ] : []
 

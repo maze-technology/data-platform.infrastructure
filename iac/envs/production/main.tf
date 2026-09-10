@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.13"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.14"
 
   providers = {
     aws.rgw = aws.rgw
@@ -234,6 +234,11 @@ module "infrastructure_base" {
   coder_postgresql_storage_size = "10Gi"
   coder_oidc_allowed_groups     = var.coder_oidc_allowed_groups
 
+  # Paperclip — VPN-only AI agent orchestration (K8s sandbox-cr)
+  enable_paperclip                  = true
+  paperclip_postgresql_storage_size = "10Gi"
+  paperclip_home_storage_size       = "10Gi"
+
   # Backup — Velero + Kopia + RGW rclone crypt → OVH Object Storage (ovh.tf)
   backup_enabled                     = var.backup_enabled
   backup_s3_bucket                   = local.backup_s3_bucket
@@ -286,6 +291,14 @@ module "infrastructure_base" {
       user     = "coder"
       database = "coder"
       password = nonsensitive(module.infrastructure_base.coder_postgresql_password)
+    },
+    {
+      name     = "paperclip"
+      host     = "paperclip-pg-rw.paperclip.svc.cluster.local"
+      port     = 5432
+      user     = "paperclip"
+      database = "paperclip"
+      password = nonsensitive(module.infrastructure_base.paperclip_postgresql_password)
     },
   ] : []
 

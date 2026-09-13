@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.16"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.17"
 
   providers = {
     aws.rgw = aws.rgw
@@ -220,6 +220,9 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
+  # Keep registry at 1 until shared http.secret is verified across replicas.
+  registry_min_replicas = 1
+  registry_max_replicas = 1
 
   # Kellnr private Cargo registry (crates.<domain>)
   enable_kellnr                     = true

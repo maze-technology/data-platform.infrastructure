@@ -13,7 +13,7 @@ Separate OpenTofu root for **org-wide GitLab groups** (former GitHub teams). Kep
 
 No user memberships yet (SSO later). Toggle with `gitlab_groups_enabled` (default `true`).
 
-`engineers` / `admins` may already exist from the production `gitlab-ci-cosign` bootstrap (OIDC ACL). If `engineers` already exists, import before apply:
+`engineers` / `admins` may already exist from an earlier OIDC ACL bootstrap. If `engineers` already exists, import before apply:
 
 ```bash
 tofu import 'gitlab_group.engineers[0]' engineers

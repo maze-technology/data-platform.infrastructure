@@ -23,26 +23,6 @@ output "ovh_lb_id" {
   value       = try(ovh_cloud_project_loadbalancer.vpn[0].id, null)
 }
 
-output "cosign_vault_path" {
-  description = "Vault path for cosign signing keys (private_key, public_key, password)"
-  value       = module.infrastructure_base.cosign_vault_path
-}
-
-output "cosign_ci_scope" {
-  description = "COSIGN_* CI variables are instance-level (available to all projects)"
-  value       = module.infrastructure_base.cosign_ci_scope
-}
-
-output "gitlab_org_group" {
-  description = "GitLab org group shared with engineers"
-  value       = module.infrastructure_base.gitlab_org_group
-}
-
-output "kyverno_signed_images_label" {
-  description = "Label namespaces with this to require cosign-verified images from the Maze registry"
-  value       = module.infrastructure_base.kyverno_signed_images_label
-}
-
 output "bootstrap_credentials" {
   description = "Initial credentials — day-to-day login is Keycloak SSO; Keycloak master is break-glass only"
   sensitive   = true

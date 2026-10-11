@@ -111,4 +111,4 @@ See [docs/platform-secrets-backup.md](docs/platform-secrets-backup.md).
 ## Related
 
 - [`infrastructure-base`](https://github.com/maze-technology/infrastructure-base) — versioned root module
-- [docs/gitlab-container-security.md](docs/gitlab-container-security.md) — cosign + Kyverno signed-image policy
+- [docs/gitlab-container-security.md](docs/gitlab-container-security.md) — Trivy container image scan in CI

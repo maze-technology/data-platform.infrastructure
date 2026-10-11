@@ -95,15 +95,33 @@ DNS: `vpn.maze.trading` → LB floating IP via **public** DNS only (CoreDNS must
 override it to the ingress ClusterIP — that breaks the WireGuard endpoint after
 connect). App names (`scm`, `auth`, `crates`, `git-ssh`, …) resolve through CoreDNS while on VPN.
 
+## Control-plane API HA (kube-vip)
+
+Do **not** pin kubelets to a single node IP (`192.168.10.1:6443`). If that apiserver
+dies, every node goes NotReady.
+
+- Inventory: `API_VIP` (e.g. `192.168.10.10`) and `CONTROL_PLANE_ENDPOINT=${API_VIP}:6443`.
+- Bootstrap (`03-kubeadm-cluster.sh`) installs a **kube-vip** ARP static pod on each
+  control-plane when `API_VIP` is set; Cilium `k8sServiceHost` uses the VIP.
+- Existing cluster: recover API access, then:
+
+```bash
+export KUBECONFIG=~/.kube/config-maze-prod
+./scripts/bare-metal/04-ha-api-vip.sh --migrate
+# then set CONTROL_PLANE_ENDPOINT=${API_VIP}:6443 in inventory.env and laptop kubeconfig
+```
+
 ## SSH access
 
 SSH on the bare-metal nodes is **not** exposed to the public internet.
 
-- Preferred: connect to WireGuard, then SSH to private IPs (`192.168.10.1` / `.2` / `.3`).
-  Peer `AllowedIPs` must include the vRack CIDR (`192.168.0.0/16`) so those routes go
-  through the tunnel — regenerate/re-import the peer config after OpenTofu updates it.
-- Break-glass: the management jump host IP (`JUMP_IP`, set automatically when running
-  `01-host-basics.sh --remote`) may still reach port 22. OVH IPMI/KVM remains the last resort.
+- Preferred: connect to WireGuard, then SSH to private IPs (`192.168.10.1` / `.2` / `.3`)
+  or the API VIP. Peer `AllowedIPs` must include the vRack CIDR (`192.168.0.0/16`).
+- **Break-glass:** OVH **IPMI / KVM** (console + power). There is no separate out-of-band
+  VPN host; in-cluster WireGuard depends on the cluster staying healthy enough to serve
+  NodePort `31820`. Keep IPMI credentials tested.
+- Optional: management jump host IP (`JUMP_IP` from `01-host-basics.sh --remote`) may
+  still reach port 22 if that UFW rule was applied.
 - Bootstrap UFW allows SSH from the VPN subnet (`10.8.0.0/24`), pod CIDR (`10.244.0.0/16`
   for WireGuard hairpin), and `JUMP_IP` — never `Anywhere`.
 

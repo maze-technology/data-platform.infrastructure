@@ -6,7 +6,7 @@ locals {
   create = var.gitlab_groups_enabled
 }
 
-# Parent: engineers (may already exist as OIDC ACL roster from gitlab-ci-cosign —
+# Parent: engineers (may already exist as OIDC ACL roster from earlier bootstrap —
 # import if so: tofu import 'gitlab_group.engineers[0]' engineers)
 resource "gitlab_group" "engineers" {
   count = local.create ? 1 : 0

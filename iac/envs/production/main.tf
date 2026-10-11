@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.23"
+  source = "git::https://scm.maze.trading/data-platform/infrastructure-base.git?ref=v0.2.24"
 
   providers = {
     aws.rgw = aws.rgw
@@ -220,6 +220,8 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
+  # Runner manager pods (each concurrent=3 → 9 jobs); chart defaults: req 50m/128Mi, lim 500m/512Mi.
+  gitlab_runner_replicas = 3
   # Keep registry at 1 until shared http.secret is verified across replicas.
   registry_min_replicas = 1
   registry_max_replicas = 1

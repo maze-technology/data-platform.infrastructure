@@ -12,24 +12,41 @@ WORKDIR="${SCRIPT_DIR}/.cluster-state"
 mkdir -p "${WORKDIR}"
 chmod 700 "${WORKDIR}"
 
-echo "==> kubeadm init on ${BM01_NAME} (${BM01_SSH})"
+API_VIP="${API_VIP:-}"
+# Prefer dedicated HA VIP when set (kube-vip ARP). Fall back to BM01 private IP.
+if [[ -n "${API_VIP}" ]]; then
+  CONTROL_PLANE_ENDPOINT="${API_VIP}:6443"
+fi
+EXTRA_SANS="${API_VIP:+${API_VIP},}${BM01_PRIVATE},${BM02_PRIVATE},${BM03_PRIVATE},${BM01_PUBLIC},${BM02_PUBLIC},${BM03_PUBLIC},${LB_FLOATING_IP},bm-01,bm-02,bm-03,${BM01_SSH},${BM02_SSH},${BM03_SSH}"
+CILIUM_API_HOST="${API_VIP:-${BM01_PRIVATE}}"
+
+echo "==> kubeadm init on ${BM01_NAME} (${BM01_SSH}) endpoint=${CONTROL_PLANE_ENDPOINT}"
 remote "${BM01_SSH}" "sudo bash -s" <<EOF
 set -euo pipefail
 # Reset any previous attempt (keep /etc/cni/net.d dir — containerd fatals if removed)
 kubeadm reset -f >/dev/null 2>&1 || true
 rm -rf /var/lib/cni || true
-mkdir -p /etc/cni/net.d
+mkdir -p /etc/cni/net.d /etc/kubernetes/manifests
 rm -f /etc/cni/net.d/* || true
 systemctl restart containerd
 sleep 2
+EOF
 
+# HA API VIP: install kube-vip static pod on BM01 before kubeadm init so the VIP exists.
+if [[ -n "${API_VIP}" ]]; then
+  echo "==> installing kube-vip static pod on first CP (VIP ${API_VIP})"
+  "${SCRIPT_DIR}/04-ha-api-vip.sh" --install-first
+fi
+
+remote "${BM01_SSH}" "sudo bash -s" <<EOF
+set -euo pipefail
 kubeadm init \\
   --control-plane-endpoint="${CONTROL_PLANE_ENDPOINT}" \\
   --apiserver-advertise-address="${BM01_PRIVATE}" \\
   --pod-network-cidr="${POD_CIDR}" \\
   --service-cidr="${SERVICE_CIDR}" \\
   --upload-certs \\
-  --apiserver-cert-extra-sans="${BM01_PRIVATE},${BM02_PRIVATE},${BM03_PRIVATE},${BM01_PUBLIC},${BM02_PUBLIC},${BM03_PUBLIC},${LB_FLOATING_IP},bm-01,bm-02,bm-03,${BM01_SSH},${BM02_SSH},${BM03_SSH}"
+  --apiserver-cert-extra-sans="${EXTRA_SANS}"
 
 mkdir -p /home/${SSH_USER}/.kube
 cp /etc/kubernetes/admin.conf /home/${SSH_USER}/.kube/config
@@ -71,6 +88,12 @@ EOF
 join_cp "${BM02_SSH}" "${BM02_PRIVATE}"
 join_cp "${BM03_SSH}" "${BM03_PRIVATE}"
 
+# Copy kube-vip static pod to additional CPs (per-node iface).
+if [[ -n "${API_VIP}" ]]; then
+  echo "==> installing kube-vip on remaining control-planes"
+  "${SCRIPT_DIR}/04-ha-api-vip.sh" --install-all
+fi
+
 echo "==> Installing Cilium CNI"
 remote "${BM01_SSH}" "bash -s" <<EOF
 set -euo pipefail
@@ -84,10 +107,11 @@ sudo tar xzvfC "cilium-linux-\${CLI_ARCH}.tar.gz" /usr/local/bin
 rm -f "cilium-linux-\${CLI_ARCH}.tar.gz"{,.sha256sum}
 
 # kube-proxy replacement off initially for simpler first bring-up with kubeadm
+# k8sServiceHost must be the HA VIP when API_VIP is set (not a single node IP).
 cilium install --version 1.17.2 \\
   --set ipam.mode=kubernetes \\
   --set kubeProxyReplacement=false \\
-  --set k8sServiceHost=${BM01_PRIVATE} \\
+  --set k8sServiceHost=${CILIUM_API_HOST} \\
   --set k8sServicePort=6443
 
 cilium status --wait

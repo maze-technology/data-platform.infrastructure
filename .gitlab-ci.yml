@@ -1,10 +1,17 @@
 # OpenTofu CI for infrastructure (GitLab SoT).
-# Ports useful GitHub workflows:
-#   - opentofu-fmt-check.yaml → shared opentofu-fmt template
-#   - release-approval.yaml  → manual gate on MRs targeting main
-#
 # Composition roots only: fmt is enough for validate. Apply stays local/tofu CLI.
 # Tagging main is done via ./release.sh (FF develop→main), not auto-tag.
+
+include:
+  - project: "data-platform/infrastructure-base"
+    ref: "v0.2.26"
+    file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
+  - project: "data-platform/infrastructure-base"
+    ref: "v0.2.26"
+    file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
+  - project: "data-platform/infrastructure-base"
+    ref: "v0.2.26"
+    file: "/ci/templates/release-approval.gitlab-ci.yml"
 
 workflow:
   rules:
@@ -18,10 +25,6 @@ workflow:
 stages:
   - validate
 
-include:
-  - project: "data-platform/infrastructure-base"
-    ref: "v0.2.26"
-    file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
-  - project: "data-platform/infrastructure-base"
-    ref: "v0.2.26"
-    file: "/ci/templates/release-approval.gitlab-ci.yml"
+# Until infrastructure-base tags interruptible fmt (post-v0.2.26), set it here.
+opentofu_fmt_check:
+  interruptible: true

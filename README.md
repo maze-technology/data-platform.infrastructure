@@ -4,13 +4,13 @@ OpenTofu **module** for the data-platform data plane. Composed from [`iac/infras
 
 ## Scope
 
-| Piece | Status |
-|-------|--------|
-| Namespace | Implemented |
-| Kafka (Strimzi) | Gated (`enable_kafka`); chart pin TBD |
-| Valkey (data-plane) | Gated (`enable_valkey`); separate from GitLab Valkey |
-| Backend workloads | Gated (`enable_services`); shared Helm chart under `charts/backend` |
-| KEDA ScaledObjects | Template in shared chart (operator stays on the platform) |
+| Piece | Implementation |
+|-------|----------------|
+| Namespace | `kubernetes_namespace_v1` |
+| KEDA | `helm_release` kedacore/keda (`enable_keda`) |
+| Kafka | Strimzi operator + KRaft `Kafka`/`KafkaNodePool` + catalog `KafkaTopic`s (`enable_kafka`) |
+| Valkey | valkey-io/valkey chart (`enable_valkey`) — separate from GitLab Valkey |
+| Backends | Shared chart `charts/backend` via `helm_release` (`enable_services`) |
 
 ## Usage
 
@@ -18,11 +18,13 @@ OpenTofu **module** for the data-platform data plane. Composed from [`iac/infras
 module "data_platform" {
   source = "git::https://scm.maze.trading/data-platform/infrastructure.git?ref=v0.1.0"
 
-  environment = "local"
-  # enable_kafka    = true
-  # enable_valkey   = true
-  # enable_services = true
-  # services        = merge(module.data_platform./* or pass catalog */)
+  environment      = "local"
+  enable_keda      = true
+  enable_kafka     = true
+  enable_valkey    = true
+  enable_services  = true
+  kafka_replicas   = 1
+  # production: kafka_replicas = 3
 }
 ```
 
@@ -33,8 +35,12 @@ Pin a **tag** from env roots (same Renovate style as `infrastructure-base`).
 ```
 .
 ├── charts/backend/   # shared Spring Boot chart + optional KEDA ScaledObject
-├── main.tf           # namespace + gated placeholders
+├── keda.tf
+├── kafka.tf
+├── valkey.tf
+├── backends.tf
 ├── services.tf       # default service catalog
+├── main.tf
 ├── variables.tf
 ├── outputs.tf
 └── versions.tf

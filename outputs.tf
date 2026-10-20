@@ -13,6 +13,11 @@ output "valkey_enabled" {
   value       = var.enable_valkey
 }
 
+output "keda_enabled" {
+  description = "Whether KEDA operator install is enabled"
+  value       = var.enable_keda
+}
+
 output "services_enabled" {
   description = "Whether backend service workloads are enabled"
   value       = var.enable_services
@@ -23,13 +28,18 @@ output "service_names" {
   value       = sort(keys(local.effective_services))
 }
 
-# Filled in when Kafka/Valkey helm releases land.
 output "kafka_bootstrap_servers" {
-  description = "Kafka bootstrap servers (null until enable_kafka is implemented)"
-  value       = null
+  description = "Kafka bootstrap servers (null when Kafka disabled)"
+  value       = local.kafka_bootstrap
 }
 
 output "valkey_host" {
-  description = "Valkey host (null until enable_valkey is implemented)"
-  value       = null
+  description = "Valkey host (null when Valkey disabled)"
+  value       = local.valkey_host
+}
+
+output "valkey_password" {
+  description = "Valkey default ACL user password (null when Valkey disabled)"
+  value       = try(random_password.valkey[0].result, null)
+  sensitive   = true
 }

@@ -15,42 +15,18 @@ locals {
 
   # Env roots may pass var.services; otherwise use the in-module catalog.
   effective_services = length(var.services) > 0 ? var.services : local.default_services
-}
 
-# --- Kafka (Strimzi) ----------------------------------------------------------
-# enable_kafka gates install. Chart/version pins land in a follow-up MR.
+  kafka_cluster_name = var.kafka_cluster_name
+  kafka_bootstrap = var.enable_kafka ? format(
+    "%s-kafka-bootstrap.%s.svc.cluster.local:9092",
+    local.kafka_cluster_name,
+    local.namespace,
+  ) : null
 
-resource "terraform_data" "kafka_placeholder" {
-  count = var.enable_kafka ? 1 : 0
-
-  input = {
-    namespace = local.namespace
-    note      = "TODO: helm_release strimzi-operator + Kafka CR"
-  }
-}
-
-# --- Valkey (data-plane cache; not GitLab's valkey) ----------------------------
-
-resource "terraform_data" "valkey_placeholder" {
-  count = var.enable_valkey ? 1 : 0
-
-  input = {
-    namespace   = local.namespace
-    storage     = var.valkey_storage_size
-    storage_cls = var.valkey_storage_class
-    note        = "TODO: helm_release valkey-io/valkey"
-  }
-}
-
-# --- Backend services (shared chart + catalog) --------------------------------
-
-resource "terraform_data" "services_placeholder" {
-  for_each = var.enable_services ? local.effective_services : {}
-
-  input = {
-    namespace = local.namespace
-    name      = each.key
-    image     = "${each.value.image_repository}:${each.value.image_tag}"
-    note      = "TODO: helm_release shared backend chart + KEDA ScaledObject"
-  }
+  valkey_release_name = "valkey"
+  valkey_host = var.enable_valkey ? format(
+    "%s.%s.svc.cluster.local",
+    local.valkey_release_name,
+    local.namespace,
+  ) : null
 }

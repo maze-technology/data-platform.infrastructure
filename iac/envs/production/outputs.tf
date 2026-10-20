@@ -93,7 +93,12 @@ output "tofu_state_access_key" {
 
 output "tofu_state_secret_key" {
   description = "Secret key for OpenTofu state bucket"
-  value       = ovh_cloud_project_user_s3_credential.tofu_state.secret_access_key
+  value       = ovh_cloud_project_user_s3_credential.tofu_state.access_key_id
   sensitive   = true
+}
+
+output "data_platform_namespace" {
+  description = "Data-platform namespace when enable_data_platform is true"
+  value       = try(module.data_platform[0].namespace, null)
 }
 

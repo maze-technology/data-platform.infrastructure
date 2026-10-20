@@ -1,0 +1,26 @@
+name: ""
+namespace: data-platform
+
+image:
+  repository: ""
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  port: 8080
+
+resources: {}
+
+env: {}
+
+keda:
+  enabled: false
+  pollingInterval: 30
+  cooldownPeriod: 300
+  minReplicaCount: 0
+  maxReplicaCount: 10
+  consumerGroup: ""
+  topics: []
+  bootstrapServers: ""

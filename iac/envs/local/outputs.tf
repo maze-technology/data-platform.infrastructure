@@ -34,3 +34,8 @@ output "backup_schedule" {
   sensitive   = true
   value       = module.infrastructure_base.backup_schedule
 }
+
+output "data_platform_namespace" {
+  description = "Data-platform namespace when enable_data_platform is true"
+  value       = try(module.data_platform[0].namespace, null)
+}

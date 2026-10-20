@@ -276,3 +276,16 @@ module "infrastructure_base" {
   backup_object_sync_enabled         = var.backup_object_sync_enabled
   backup_object_sync_schedule_cron   = var.backup_object_sync_schedule_cron
 }
+
+# Data-platform data plane (Kafka, Valkey, backends). Pin a tag when cutting a release;
+# default ref is develop for local bring-up. Gated off so existing applies stay unchanged.
+module "data_platform" {
+  count  = var.enable_data_platform ? 1 : 0
+  source = "git::https://scm.maze.trading/data-platform/infrastructure.git?ref=develop"
+
+  environment      = "local"
+  enable_kafka     = false
+  enable_valkey    = false
+  enable_services  = false
+  create_namespace = true
+}

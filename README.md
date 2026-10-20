@@ -1,8 +1,13 @@
 # infrastructure
 
-Environment composition roots that pin and apply [`infrastructure-base`](https://github.com/maze-technology/infrastructure-base).
+Cluster composition roots under the **`iac`** GitLab group. Each env under `iac/envs/*` is a thin OpenTofu root: providers, backends, tfvars, and module calls.
 
-Each env under `iac/envs/*` is a thin OpenTofu root: providers, backends, tfvars, and a single `module "infrastructure_base"` call. Shared platform logic lives in the versioned base module. Renovate bumps the literal `ref=` when new tags land on `infrastructure-base`.
+| Module | Role |
+|--------|------|
+| [`infrastructure-base`](https://scm.maze.trading/data-platform/infrastructure-base) | Platform plane (Ceph, Vault, GitLab, Argo CD, …) |
+| [`data-platform/infrastructure`](https://scm.maze.trading/data-platform/infrastructure) | Data plane (Kafka, Valkey, backends) — gated by `enable_data_platform` |
+
+Renovate bumps literal `ref=` pins when new tags land.
 
 ## Pinning infrastructure-base
 
@@ -110,5 +115,6 @@ See [docs/platform-secrets-backup.md](docs/platform-secrets-backup.md).
 
 ## Related
 
-- [`infrastructure-base`](https://github.com/maze-technology/infrastructure-base) — versioned root module
+- [`infrastructure-base`](https://scm.maze.trading/data-platform/infrastructure-base) — platform module
+- [`data-platform/infrastructure`](https://scm.maze.trading/data-platform/infrastructure) — data-plane module
 - [docs/gitlab-container-security.md](docs/gitlab-container-security.md) — Trivy container image scan in CI

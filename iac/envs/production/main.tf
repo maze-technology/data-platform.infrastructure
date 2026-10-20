@@ -313,3 +313,15 @@ module "infrastructure_base" {
     ovh_cloud_project_user_s3_credential.backup,
   ]
 }
+
+# Data-platform data plane (Kafka, Valkey, backends). Pin a release tag before enabling.
+module "data_platform" {
+  count  = var.enable_data_platform ? 1 : 0
+  source = "git::https://scm.maze.trading/data-platform/infrastructure.git?ref=develop"
+
+  environment      = "production"
+  enable_kafka     = false
+  enable_valkey    = false
+  enable_services  = false
+  create_namespace = true
+}

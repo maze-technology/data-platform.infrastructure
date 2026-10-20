@@ -495,3 +495,15 @@ variable "backup_s3_dr_bucket" {
   default     = "maze-cluster-backup-production-sbg"
 }
 
+variable "enable_data_platform" {
+  description = "Compose data-platform/infrastructure (Kafka, Valkey, backends). Off until first tagged module release is ready."
+  type        = bool
+  default     = false
+}
+
+variable "data_platform_module_ref" {
+  description = "Git ref for data-platform/infrastructure module (tag preferred)"
+  type        = string
+  default     = "develop"
+}
+

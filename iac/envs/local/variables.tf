@@ -159,3 +159,9 @@ variable "backup_object_sync_schedule_cron" {
   type        = string
   default     = "30 2 * * *"
 }
+
+variable "enable_data_platform" {
+  description = "Compose data-platform/infrastructure (Kafka, Valkey, backends). Off until first tagged module release is ready."
+  type        = bool
+  default     = false
+}

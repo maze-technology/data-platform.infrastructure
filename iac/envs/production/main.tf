@@ -196,9 +196,9 @@ module "infrastructure_base" {
   vault_storage_size    = "10Gi"
 
   # Observability — production sizing
-  prometheus_storage_size = "500Gi"
-  grafana_storage_size    = "100Gi"
-  loki_storage_size       = "1Ti"
+  prometheus_storage_size      = "500Gi"
+  grafana_storage_size         = "100Gi"
+  loki_storage_size            = "1Ti"
   loki_deployment_mode         = "scalable"
   loki_chunks_cache_memory_mb  = 2048
   loki_results_cache_memory_mb = 512

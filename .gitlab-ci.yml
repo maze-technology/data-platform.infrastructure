@@ -2,13 +2,13 @@
 # Fmt-check only; apply is composed from iac/infrastructure env roots.
 
 include:
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.26"
     file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.26"
     file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.26"
     file: "/ci/templates/release-approval.gitlab-ci.yml"
 

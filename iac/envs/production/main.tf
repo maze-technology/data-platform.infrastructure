@@ -220,8 +220,9 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
-  # Runner manager pods (each concurrent=3 → 9 jobs); chart defaults: req 50m/128Mi, lim 500m/512Mi.
-  gitlab_runner_replicas = 3
+  # Runner managers: 3× concurrent=2 → max 6 CI jobs (queued beyond that). Avoids etcd/API storms.
+  gitlab_runner_replicas   = 3
+  gitlab_runner_concurrent = 2
   # Keep registry at 1 until shared http.secret is verified across replicas.
   registry_min_replicas = 1
   registry_max_replicas = 1

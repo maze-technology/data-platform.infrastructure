@@ -94,7 +94,7 @@ Velero + Kopia (encrypted PVC backups) and rclone crypt mirror of RGW buckets (G
 | `local` | RGW bucket `cluster-backup-local` (same Ceph) | Smoke only. Makefile passes RGW keys during `apply-services`. |
 | `production` | OVH Object Storage (S3) | **On by default.** OpenTofu creates the GRA primary bucket (via `ovh_cloud_project_storage`) and an **SBG DR** bucket. GRA→SBG uses OVH async replication. Set OVH keys + `backup_encryption_password` in tfvars. |
 
-Keycloak, GitLab, Kellnr, and Coder use in-cluster Postgres; their PVCs are covered by Velero/Kopia (same as other stateful apps). Coder workspace home directories live on Rook Ceph PVCs in `coder-workspaces` — see [infrastructure-base/docs/coder.md](https://scm.maze.trading/data-platform/infrastructure-base/-/blob/main/docs/coder.md) for SSH/Cursor access and restore.
+Keycloak, GitLab, Kellnr, and Coder use in-cluster Postgres; their PVCs are covered by Velero/Kopia (same as other stateful apps). Coder workspace home directories live on Rook Ceph PVCs in `coder-workspaces` — see [infrastructure-base/docs/coder.md](https://scm.maze.trading/iac/infrastructure-base/-/blob/main/docs/coder.md) for SSH/Cursor access and restore.
 
 **Restore from DR:** retarget tools to the SBG endpoint (`ovh_backup_dr_endpoint` output) with the same keys/password.
 

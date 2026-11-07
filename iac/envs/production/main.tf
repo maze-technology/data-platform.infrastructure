@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.28"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.29"
 
   providers = {
     aws.rgw = aws.rgw
@@ -199,7 +199,9 @@ module "infrastructure_base" {
   prometheus_storage_size = "500Gi"
   grafana_storage_size    = "100Gi"
   loki_storage_size       = "1Ti"
-  loki_deployment_mode    = "scalable"
+  loki_deployment_mode         = "scalable"
+  loki_chunks_cache_memory_mb  = 2048
+  loki_results_cache_memory_mb = 512
 
   # Argo CD HA
   argocd_replica_count = 3

@@ -3,13 +3,13 @@
 # Tagging main is done via ./release.sh (FF develop→main), not auto-tag.
 
 include:
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.27"
     file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.27"
     file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
-  - project: "data-platform/infrastructure-base"
+  - project: "iac/infrastructure-base"
     ref: "v0.2.27"
     file: "/ci/templates/release-approval.gitlab-ci.yml"
 

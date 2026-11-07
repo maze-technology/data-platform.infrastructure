@@ -93,7 +93,7 @@ output "tofu_state_access_key" {
 
 output "tofu_state_secret_key" {
   description = "Secret key for OpenTofu state bucket"
-  value       = ovh_cloud_project_user_s3_credential.tofu_state.access_key_id
+  value       = ovh_cloud_project_user_s3_credential.tofu_state.secret_access_key
   sensitive   = true
 }
 

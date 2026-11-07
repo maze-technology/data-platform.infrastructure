@@ -4,7 +4,7 @@ Cluster composition roots under the **`iac`** GitLab group. Each env under `iac/
 
 | Module | Role |
 |--------|------|
-| [`infrastructure-base`](https://scm.maze.trading/data-platform/infrastructure-base) | Platform plane (Ceph, Vault, GitLab, Argo CD, …) |
+| [`infrastructure-base`](https://scm.maze.trading/iac/infrastructure-base) | Platform plane (Ceph, Vault, GitLab, Argo CD, …) |
 | [`data-platform/infrastructure`](https://scm.maze.trading/data-platform/infrastructure) | Data plane (Kafka, Valkey, backends) — gated by `enable_data_platform` |
 
 Renovate bumps literal `ref=` pins when new tags land.
@@ -99,7 +99,7 @@ Velero + Kopia (encrypted PVC backups) and rclone crypt mirror of RGW buckets (G
 | `local` | RGW bucket `cluster-backup-local` (same Ceph) | Smoke only. Makefile passes RGW keys during `apply-services`. |
 | `production` | OVH Object Storage (S3) | **On by default.** OpenTofu creates the GRA primary bucket (via `ovh_cloud_project_storage`) and an **SBG DR** bucket. GRA→SBG uses OVH async replication. Set OVH keys + `backup_encryption_password` in tfvars. |
 
-Keycloak, GitLab, Kellnr, and Coder use in-cluster Postgres; their PVCs are covered by Velero/Kopia (same as other stateful apps). Coder workspace home directories live on Rook Ceph PVCs in `coder-workspaces` — see [infrastructure-base/docs/coder.md](https://scm.maze.trading/data-platform/infrastructure-base/-/blob/main/docs/coder.md) for SSH/Cursor access and restore.
+Keycloak, GitLab, Kellnr, and Coder use in-cluster Postgres; their PVCs are covered by Velero/Kopia (same as other stateful apps). Coder workspace home directories live on Rook Ceph PVCs in `coder-workspaces` — see [infrastructure-base/docs/coder.md](https://scm.maze.trading/iac/infrastructure-base/-/blob/main/docs/coder.md) for SSH/Cursor access and restore.
 
 **Restore from DR:** retarget tools to the SBG endpoint (`ovh_backup_dr_endpoint` output) with the same keys/password.
 
@@ -115,6 +115,6 @@ See [docs/platform-secrets-backup.md](docs/platform-secrets-backup.md).
 
 ## Related
 
-- [`infrastructure-base`](https://scm.maze.trading/data-platform/infrastructure-base) — platform module
+- [`infrastructure-base`](https://scm.maze.trading/iac/infrastructure-base) — platform module
 - [`data-platform/infrastructure`](https://scm.maze.trading/data-platform/infrastructure) — data-plane module
 - [docs/gitlab-container-security.md](docs/gitlab-container-security.md) — Trivy container image scan in CI

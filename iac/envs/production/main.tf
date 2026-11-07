@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.30"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.32"
 
   providers = {
     aws.rgw = aws.rgw
@@ -222,9 +222,19 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
-  # Runner managers: 3× concurrent=2 → max 6 CI jobs (queued beyond that). Avoids etcd/API storms.
-  gitlab_runner_replicas   = 3
-  gitlab_runner_concurrent = 2
+  # Shared CP nodes: 1×1 CI only. Pair with raised apiserver/etcd Guaranteed + kubelet reserved.
+  gitlab_runner_replicas                 = 1
+  gitlab_runner_concurrent               = 1
+  gitlab_runner_job_memory_overwrite_max = "4Gi"
+
+  # Control-plane memory isolation on shared nodes.
+  apiserver_memory_request       = "3Gi"
+  apiserver_memory_limit         = "3Gi"
+  etcd_memory_request            = "2Gi"
+  etcd_memory_limit              = "2Gi"
+  kube_reserved_memory           = "2Gi"
+  system_reserved_memory         = "2Gi"
+  eviction_hard_memory_available = "1Gi"
   # Keep registry at 1 until shared http.secret is verified across replicas.
   registry_min_replicas = 1
   registry_max_replicas = 1

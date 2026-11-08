@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.42"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.43"
 
   providers = {
     aws.rgw = aws.rgw
@@ -222,9 +222,9 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
-  # Shared CP nodes: 1×2 CI (one manager, two concurrent jobs). Pair with raised apiserver/etcd Guaranteed + kubelet reserved.
+  # Shared CP nodes: 1 manager × 4 concurrent CI jobs. Pair with raised apiserver/etcd Guaranteed + kubelet reserved.
   gitlab_runner_replicas                 = 1
-  gitlab_runner_concurrent               = 1
+  gitlab_runner_concurrent               = 4
   gitlab_runner_job_memory_overwrite_max = "4Gi"
 
   # Control-plane memory isolation on shared nodes.

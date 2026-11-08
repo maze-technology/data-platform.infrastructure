@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.27"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.35"
 
   providers = {
     aws.rgw = aws.rgw
@@ -196,10 +196,12 @@ module "infrastructure_base" {
   vault_storage_size    = "10Gi"
 
   # Observability — production sizing
-  prometheus_storage_size = "500Gi"
-  grafana_storage_size    = "100Gi"
-  loki_storage_size       = "1Ti"
-  loki_deployment_mode    = "scalable"
+  prometheus_storage_size      = "500Gi"
+  grafana_storage_size         = "100Gi"
+  loki_storage_size            = "1Ti"
+  loki_deployment_mode         = "scalable"
+  loki_chunks_cache_memory_mb  = 2048
+  loki_results_cache_memory_mb = 512
 
   # Argo CD HA
   argocd_replica_count = 3
@@ -220,8 +222,19 @@ module "infrastructure_base" {
   s3_force_destroy        = false
   webservice_min_replicas = 2
   webservice_max_replicas = 4
-  # Runner manager pods (each concurrent=3 → 9 jobs); chart defaults: req 50m/128Mi, lim 500m/512Mi.
-  gitlab_runner_replicas = 3
+  # Shared CP nodes: 1×2 CI (one manager, two concurrent jobs). Pair with raised apiserver/etcd Guaranteed + kubelet reserved.
+  gitlab_runner_replicas                 = 1
+  gitlab_runner_concurrent               = 1
+  gitlab_runner_job_memory_overwrite_max = "4Gi"
+
+  # Control-plane memory isolation on shared nodes.
+  apiserver_memory_request       = "3Gi"
+  apiserver_memory_limit         = "3Gi"
+  etcd_memory_request            = "2Gi"
+  etcd_memory_limit              = "2Gi"
+  kube_reserved_memory           = "2Gi"
+  system_reserved_memory         = "2Gi"
+  eviction_hard_memory_available = "1Gi"
   # Keep registry at 1 until shared http.secret is verified across replicas.
   registry_min_replicas = 1
   registry_max_replicas = 1

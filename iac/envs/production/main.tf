@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.32"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.36"
 
   providers = {
     aws.rgw = aws.rgw
@@ -200,8 +200,8 @@ module "infrastructure_base" {
   grafana_storage_size         = "100Gi"
   loki_storage_size            = "1Ti"
   loki_deployment_mode         = "scalable"
-  loki_chunks_cache_memory_mb  = 2048
-  loki_results_cache_memory_mb = 512
+  loki_chunks_cache_memory_mb  = 512
+  loki_results_cache_memory_mb = 128
 
   # Argo CD HA
   argocd_replica_count = 3
@@ -253,7 +253,7 @@ module "infrastructure_base" {
   coder_oidc_allowed_groups     = var.coder_oidc_allowed_groups
 
   # Paperclip — VPN-only AI agent orchestration (K8s sandbox-cr)
-  enable_paperclip                  = true
+  enable_paperclip                  = false
   paperclip_postgresql_storage_size = "10Gi"
   paperclip_home_storage_size       = "10Gi"
 
@@ -309,15 +309,7 @@ module "infrastructure_base" {
       user     = "coder"
       database = "coder"
       password = nonsensitive(module.infrastructure_base.coder_postgresql_password)
-    },
-    {
-      name     = "paperclip"
-      host     = "paperclip-pg-rw.paperclip.svc.cluster.local"
-      port     = 5432
-      user     = "paperclip"
-      database = "paperclip"
-      password = nonsensitive(module.infrastructure_base.paperclip_postgresql_password)
-    },
+    }
   ] : []
 
   depends_on = [

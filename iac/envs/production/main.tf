@@ -126,7 +126,7 @@ provider "aws" {
 }
 
 module "infrastructure_base" {
-  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.41"
+  source = "git::https://scm.maze.trading/iac/infrastructure-base.git?ref=v0.2.42"
 
   providers = {
     aws.rgw = aws.rgw

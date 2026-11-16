@@ -15,8 +15,9 @@ resource "helm_release" "strimzi" {
 
   values = [
     yamlencode({
+      # Watch only the install namespace (default). Listing it in watchNamespaces
+      # duplicates RoleBindings and fails Helm with "already exists".
       watchAnyNamespace = false
-      watchNamespaces   = [local.namespace]
       resources = {
         requests = {
           memory = "384Mi"

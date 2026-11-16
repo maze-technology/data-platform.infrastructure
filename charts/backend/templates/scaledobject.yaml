@@ -1,0 +1,26 @@
+{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ required "name is required" .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.name }}
+    app.kubernetes.io/part-of: data-platform
+spec:
+  scaleTargetRef:
+    name: {{ .Values.name }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: {{ required "keda.bootstrapServers is required when keda.enabled" .Values.keda.bootstrapServers | quote }}
+        consumerGroup: {{ required "keda.consumerGroup is required when keda.enabled" .Values.keda.consumerGroup | quote }}
+        lagThreshold: "10"
+        {{- if .Values.keda.topics }}
+        topic: {{ index .Values.keda.topics 0 | quote }}
+        {{- end }}
+{{- end }}

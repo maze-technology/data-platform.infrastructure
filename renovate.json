@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "baseBranchPatterns": ["develop"],
+  "automerge": true,
+  "automergeType": "pr",
+  "terraform": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["terraform"],
+      "groupName": "OpenTofu/Terraform",
+      "reviewers": ["engineers/infrastructure-engineers"]
+    }
+  ],
+  "dependencyDashboard": true,
+  "configMigration": true,
+  "reviewersFromCodeOwners": true,
+  "expandCodeOwnersGroups": true
+}

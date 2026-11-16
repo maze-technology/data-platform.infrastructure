@@ -1,0 +1,30 @@
+# OpenTofu module for data-platform data plane (Kafka, Valkey, backends).
+# Fmt-check only; apply is composed from iac/infrastructure env roots.
+
+include:
+  - project: "iac/infrastructure-base"
+    ref: "v0.2.46"
+    file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
+  - project: "iac/infrastructure-base"
+    ref: "v0.2.46"
+    file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
+  - project: "iac/infrastructure-base"
+    ref: "v0.2.46"
+    file: "/ci/templates/release-approval.gitlab-ci.yml"
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "api"
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+
+stages:
+  - validate
+
+opentofu_fmt_check:
+  interruptible: true
+  variables:
+    OPENTOFU_ROOT: "."

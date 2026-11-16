@@ -10,6 +10,11 @@ spec:
   selector:
     app.kubernetes.io/name: {{ .Values.name }}
   ports:
+    - name: grpc
+      port: {{ .Values.service.grpcPort }}
+      targetPort: grpc
+    {{- if .Values.service.httpPort }}
     - name: http
-      port: {{ .Values.service.port }}
+      port: {{ .Values.service.httpPort }}
       targetPort: http
+    {{- end }}

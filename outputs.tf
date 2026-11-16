@@ -43,3 +43,28 @@ output "valkey_password" {
   value       = try(random_password.valkey[0].result, null)
   sensitive   = true
 }
+
+output "postgres_enabled" {
+  description = "Whether CloudNativePG Cluster is enabled"
+  value       = var.enable_postgres
+}
+
+output "postgres_host" {
+  description = "Postgres RW host (null when disabled)"
+  value       = local.postgres_host
+}
+
+output "postgres_jdbc_url" {
+  description = "JDBC URL for the bootstrap database (null when disabled)"
+  value       = local.postgres_jdbc_url
+}
+
+output "postgres_credentials_secret" {
+  description = "Secret name with Postgres username/password"
+  value       = try(kubernetes_secret_v1.postgres_credentials[0].metadata[0].name, null)
+}
+
+output "ingress_hosts" {
+  description = "VPN-only Ingress hostnames for CoreDNS (empty when ingress/services off)"
+  value       = local.service_ingress_hosts
+}

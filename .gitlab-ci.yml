@@ -3,13 +3,13 @@
 
 include:
   - project: "iac/infrastructure-base"
-    ref: "v0.2.26"
+    ref: "v0.2.46"
     file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.26"
+    ref: "v0.2.46"
     file: "/ci/templates/opentofu-fmt-check.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.26"
+    ref: "v0.2.46"
     file: "/ci/templates/release-approval.gitlab-ci.yml"
 
 workflow:

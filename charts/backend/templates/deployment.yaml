@@ -17,28 +17,41 @@ spec:
         app.kubernetes.io/name: {{ .Values.name }}
         app.kubernetes.io/part-of: data-platform
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Values.name }}
           image: "{{ required "image.repository is required" .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
+            - name: grpc
+              containerPort: {{ .Values.service.grpcPort }}
+            {{- if .Values.service.httpPort }}
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.service.httpPort }}
+            {{- end }}
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
+            {{- range .Values.envFromSecret }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .key }}
+            {{- end }}
           readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: http
+            grpc:
+              port: {{ .Values.service.grpcPort }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: http
+            grpc:
+              port: {{ .Values.service.grpcPort }}
             initialDelaySeconds: 30
             periodSeconds: 20
           resources:

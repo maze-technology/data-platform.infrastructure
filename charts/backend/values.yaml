@@ -6,14 +6,32 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+imagePullSecrets: []
+
 replicaCount: 1
 
 service:
-  port: 8080
+  # Spring gRPC default
+  grpcPort: 9090
+  # Optional HTTP/actuator (null = omit)
+  httpPort: null
 
 resources: {}
 
 env: {}
+
+# Extra env from secrets: [{ name, secretName, key }]
+envFromSecret: []
+
+ingress:
+  # VPN-only gRPC front via ingress-nginx (ClusterIP) + whitelist.
+  # Never public — restrict_to_vpn whitelist is required when enabled.
+  enabled: false
+  className: nginx
+  host: ""
+  clusterIssuer: letsencrypt-prod
+  tlsSecretName: ""
+  whitelistSourceRange: ""
 
 keda:
   enabled: false

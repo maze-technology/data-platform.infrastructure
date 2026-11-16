@@ -14,7 +14,8 @@ locals {
   namespace = var.create_namespace ? kubernetes_namespace_v1.data_platform[0].metadata[0].name : var.namespace
 
   # Env roots may pass var.services; otherwise use the in-module catalog.
-  effective_services = length(var.services) > 0 ? var.services : local.default_services
+  # jsondecode → map(object) so the ternary matches var.services' type.
+  effective_services = length(var.services) > 0 ? var.services : jsondecode(jsonencode(local.default_services))
 
   kafka_cluster_name = var.kafka_cluster_name
   kafka_bootstrap = var.enable_kafka ? format(
